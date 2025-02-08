@@ -1,4 +1,6 @@
-<p align="center"><img src="resources/img/virtual-reality.png" alt="Virtual Reality" /></p>
+<p align="center" style="font-size: 70px"><strong>TechBlog</strong></p>
+
+<p align="center"><img src="resources/img/virtual-reality.png" alt="Virtual Reality" width="300" /></p>
 
 <p align="center">
 <img src="https://img.shields.io/badge/laravel-%23FF2D20.svg?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel Logo"/>
