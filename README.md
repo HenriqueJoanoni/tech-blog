@@ -1,4 +1,4 @@
-<p align="center" style="font-size: 70px"><strong>TechBlog</strong></p>
+# TechBlog - CA2
 
 <p align="center"><img src="resources/img/virtual-reality.png" alt="Virtual Reality" width="300" /></p>
 
