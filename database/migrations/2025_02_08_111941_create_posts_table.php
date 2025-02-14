@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('image')->nullable();
             $table->integer('views')->nullable();
             $table->string('category')->nullable();
+            $table->string('author')->nullable();
             $table->timestamps();
         });
     }
