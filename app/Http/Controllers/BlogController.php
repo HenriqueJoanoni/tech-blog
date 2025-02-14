@@ -67,15 +67,4 @@ class BlogController extends Controller
             'post_id' => $request->get('id'),
         ]);
     }
-
-    /**
-     * Submit the contact form
-     *
-     * @param Request $request
-     * @return View|Factory|Application
-     */
-    public function contactSubmitForm(Request $request): View|Factory|Application
-    {
-        dd($request->all());
-    }
 }

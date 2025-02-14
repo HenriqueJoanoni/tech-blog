@@ -3,16 +3,18 @@
 @section('title', 'TechNews - Contact')
 
 @section('content')
-    <section class="relative w-full">
+    <section class="relative w-full min-h-screen flex flex-col">
+        <!-- Banner Image -->
         <div class="w-full">
             <img src="{{ Vite::asset('resources/img/mobile-development.jpg') }}" alt="Mobile Development"
                  class="w-full h-64 object-cover">
         </div>
 
-        <div class="absolute inset-x-0 top-48 flex justify-center">
-            <div class="max-w-2xl w-full bg-white p-8 shadow-lg rounded-lg relative -mt-20">
+        <!-- Contact Form (Lowered) -->
+        <div class="flex justify-center mt-6">
+            <div class="max-w-2xl w-full bg-white p-8 shadow-lg rounded-lg">
                 <h2 class="text-center text-2xl font-bold text-gray-800 mb-6">Contact Us</h2>
-                <form action="{{ route('blog.contactSubmit') }}" method="POST" class="space-y-4">
+                <form action="{{ route('blog.sendMail') }}" method="POST" class="space-y-4">
                     @csrf
 
                     <!-- Name -->
