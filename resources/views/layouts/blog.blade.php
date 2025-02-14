@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'TechNews')</title>
+    <link rel="shortcut icon" href={{ Vite::asset('resources/img/virtual-reality.png') }} type="image/x-icon">
 
     <!-- Tailwind CSS -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -14,10 +15,10 @@
 <nav class="bg-white shadow-md px-6 py-4 flex justify-between items-center">
     <a href="{{ url('/') }}" class="text-2xl font-bold text-blue-600">TechNews</a>
     <ul class="flex space-x-6">
-        <li><a href="#" class="text-gray-700 hover:text-blue-600">Home</a></li>
-        <li><a href="#" class="text-gray-700 hover:text-blue-600">Categories</a></li>
-        <li><a href="#" class="text-gray-700 hover:text-blue-600">About</a></li>
-        <li><a href="#" class="text-gray-700 hover:text-blue-600">Contact</a></li>
+        <li><a href="{{ route('blog.home') }}" class="text-gray-700 hover:text-blue-600">Home</a></li>
+        <li><a href="{{ route('blog.categories') }}" class="text-gray-700 hover:text-blue-600">Categories</a></li>
+        <li><a href="{{ route('blog.about') }}" class="text-gray-700 hover:text-blue-600">About</a></li>
+        <li><a href="{{ route('blog.contact') }}" class="text-gray-700 hover:text-blue-600">Contact</a></li>
     </ul>
 </nav>
 

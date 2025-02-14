@@ -7,7 +7,12 @@ use Illuminate\Support\Facades\Route;
 
 /** PUBLIC ROUTES */
 Route::get('/', [BlogController::class, 'home'])->name('blog.home');
-Route::get('/post/{slug}', [BlogController::class, 'show'])->name('blog.post');
+Route::get('/categories', [BlogController::class, 'categories'])->name('blog.categories');
+Route::get('/about', [BlogController::class, 'about'])->name('blog.about');
+Route::get('/contact', [BlogController::class, 'contact'])->name('blog.contact');
+
+Route::get('/post/{slug}/{id}', [BlogController::class, 'show'])->name('blog.post');
+Route::post('/contact', [BlogController::class, 'contactSubmitForm'])->name('blog.contactSubmit');
 
 /** AUTH ROUTES */
 Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
