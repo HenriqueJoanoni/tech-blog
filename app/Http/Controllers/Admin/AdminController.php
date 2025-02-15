@@ -19,4 +19,9 @@ class AdminController extends Controller
     {
         return \view('admin.users');
     }
+
+    public function managePosts():Factory|Application|View
+    {
+        return \view('admin.posts-management');
+    }
 }

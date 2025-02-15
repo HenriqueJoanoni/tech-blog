@@ -28,4 +28,5 @@ Route::get('logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
+    Route::get('/admin/posts-management', [AdminController::class, 'managePosts'])->name('admin.posts-management');
 });
