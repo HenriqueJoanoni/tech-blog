@@ -19,8 +19,13 @@ return new class extends Migration
             $table->text('content');
             $table->string('image')->nullable();
             $table->integer('views')->nullable();
-            $table->string('category')->nullable();
+            $table->unsignedBigInteger('category_id')->nullable();
+            $table->foreign('category_id')
+                ->references('id')
+                ->on('categories')
+                ->onDelete('set null');
             $table->string('author')->nullable();
+            $table->integer('is_visible')->default(0);
             $table->timestamps();
         });
     }

@@ -30,7 +30,13 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
     Route::get('/admin/posts-management', [AdminController::class, 'managePosts'])->name('admin.posts-management');
 
+    Route::get('/admin/posts/create', [AdminController::class, 'createPost'])->name('admin.create-posts');
+    Route::post('/admin/posts/store', [AdminController::class, 'storePost'])->name('admin.store-post');
+
     Route::get('/admin/edit-post/{id}', [AdminController::class, 'editPost'])->name('admin.edit-post');
+    Route::post('/admin/edit-post', [AdminController::class, 'updatePost'])->name('admin.update-post');
 
     Route::get('/admin/delete-post/{id}', [AdminController::class, 'deletePost'])->name('admin.delete-post');
+
+    Route::post('/posts/{id}/toggle-visibility', [AdminController::class, 'toggleVisibility'])->name('admin.toggle-visibility');
 });
