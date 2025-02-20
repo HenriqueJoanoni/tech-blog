@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Post;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -17,7 +18,11 @@ class BlogController extends Controller
     {
         $latestPosts = Post::latest()->take(5)->get();
         $trendingPosts = Post::orderBy('views', 'desc')->take(4)->get();
-        $technologyPosts = Post::where('category', 'Technology')->latest()->take(4)->get();
+        $technologyCategory = Category::where('category_name', 'Technology')->first();
+        $technologyPosts = Post::where('category_id', $technologyCategory->id)
+            ->latest()
+            ->take(4)
+            ->get();
 
         return view('home', compact('latestPosts', 'trendingPosts', 'technologyPosts'));
     }

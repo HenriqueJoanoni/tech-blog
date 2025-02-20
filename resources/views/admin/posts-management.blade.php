@@ -7,8 +7,11 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header d-flex justify-content-between align-items-end position-relative py-4">
                         <h3 class="card-title">Welcome to Posts Management Page</h3>
+                        <div class="insert-post-btn">
+                            <a class="btn btn-success" href="{{ route('admin.create-posts') }}">Create Post</a>
+                        </div>
                     </div>
                     <table class="table table-hover">
                         <thead>
@@ -30,12 +33,21 @@
                                 <th scope="row"><?= $post->id ?></th>
                                 <td><?= $post->title ?></td>
                                 <td><?= $post->excerpt ?></td>
-                                <td><?= $post->views ?></td>
-                                <td><?= $post->category ?></td>
+                                <td><?= $post->views ?? "N/A" ?></td>
+                                <td><?= $post->category->category_name ?></td>
                                 <td><?= $post->author ?></td>
                                 <td><?= \App\Helpers\GeneralHandler::dateFmt($post->created_at, 'd/m/Y') ?></td>
                                 <td><?= \App\Helpers\GeneralHandler::dateFmt($post->updated_at, 'd/m/Y') ?></td>
                                 <td>
+                                    <button type="button"
+                                            class="btn btn-warning"
+                                            onclick="updateVisibility(event, {{ $post->id }})">
+                                        @if($post->is_visible == 0)
+                                            <i class="fa fa-eye-slash"></i>
+                                        @else
+                                            <i class="fa fa-eye"></i>
+                                        @endif
+                                    </button>
                                     <a href="{{ route('admin.edit-post', ['id' => $post->id]) }}" class="btn btn-primary" title="Edit">
                                         <i class="fa fa-pencil"></i>
                                     </a>

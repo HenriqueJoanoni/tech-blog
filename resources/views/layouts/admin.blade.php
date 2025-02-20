@@ -13,6 +13,10 @@
           crossorigin="anonymous" referrerpolicy="no-referrer"/>
     <link rel="stylesheet"
           href="{{ asset('vendor/adminlte/plugins/overlayScrollbars/css/OverlayScrollbars.min.css') }}">
+
+    <!-- CUSTOM CSS -->
+    <link rel="stylesheet" href="{{ Vite::asset('resources/css/admin.css') }}">
+
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
@@ -39,6 +43,7 @@
 
         <section class="content">
             <div class="container-fluid">
+                <meta name="csrf-token" content="{{ csrf_token() }}">
                 @yield('content')
             </div>
         </section>
@@ -58,5 +63,6 @@
 <script src="{{ asset('vendor/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 <script src="{{ asset('vendor/adminlte/dist/js/adminlte.min.js') }}"></script>
 <script src="{{ asset('vendor/adminlte/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js') }}"></script>
+<script src="{{ Vite::asset('resources/js/admin.js') }}"></script>
 </body>
 </html>
