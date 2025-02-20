@@ -39,4 +39,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/delete-post/{id}', [AdminController::class, 'deletePost'])->name('admin.delete-post');
 
     Route::post('/posts/{id}/toggle-visibility', [AdminController::class, 'toggleVisibility'])->name('admin.toggle-visibility');
+
+    Route::get('/admin/logout', [AuthController::class, 'logout'])->name('admin.logout');
 });
