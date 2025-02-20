@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\MailController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /** PUBLIC ROUTES */
@@ -26,8 +27,10 @@ Route::get('logout', [AuthController::class, 'logout'])->name('logout');
 
 /** ADMIN ROUTES */
 Route::middleware(['auth', 'admin'])->group(function () {
+    /** ADMIN HOMEPAGE */
     Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-    Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
+
+    /** POSTS RELATED ROUTES */
     Route::get('/admin/posts-management', [AdminController::class, 'managePosts'])->name('admin.posts-management');
 
     Route::get('/admin/posts/create', [AdminController::class, 'createPost'])->name('admin.create-posts');
@@ -37,8 +40,11 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/edit-post', [AdminController::class, 'updatePost'])->name('admin.update-post');
 
     Route::get('/admin/delete-post/{id}', [AdminController::class, 'deletePost'])->name('admin.delete-post');
-
     Route::post('/admin/{id}/toggle-visibility', [AdminController::class, 'toggleVisibility'])->name('admin.toggle-visibility');
 
+    /** USER RELATED ROUTES */
+    Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
     Route::get('/admin/logout', [AuthController::class, 'logout'])->name('admin.logout');
+    Route::get('/admin/user-profile/{id}', [UserController::class, 'userProfile'])->name('admin.user-profile');
+    Route::put('/admin/user-profile', [UserController::class, 'updateProfile'])->name('admin.update-profile');
 });

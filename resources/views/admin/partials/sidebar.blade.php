@@ -12,7 +12,7 @@
                      alt="User Image">
             </div>
             <div class="info">
-                <a href="#" class="d-block">Admin User</a>
+                <a href="{{ route('admin.user-profile', auth()->id()) }}" class="d-block">Welcome {{ auth()->user()->name }}</a>
             </div>
         </div>
 

@@ -26,6 +26,9 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($request->only('email', 'password'))) {
+            $user = Auth::user();
+            $user->update(['last_login_at' => now()]);
+
             return redirect()->route('admin.dashboard');
         }
 
@@ -54,9 +57,21 @@ class AuthController extends Controller
         return redirect()->route('login')->with('success', 'Registration successful. Please login.');
     }
 
-    public function dashboard(): View|Factory|Application
+    public function dashboard(): RedirectResponse|Factory|View|Application
     {
-        return view('dashboard');
+        if (Auth::check()) {
+            $user = Auth::user();
+
+            $lastLogin = session([
+                'user_name' => $user->name,
+                'user_role' => 'admin',
+                'last_login' => now()
+            ]);
+
+            return view('dashboard', compact('user', 'lastLogin'));
+        }
+
+        return redirect()->route('login');
     }
 
     public function logout(Request $request): RedirectResponse

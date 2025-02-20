@@ -33,3 +33,50 @@ function updateVisibility(event, postId) {
             alert('Error updating visibility');
         });
 }
+
+/** USER RELATED */
+function handleAvatarUpload(event) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById('imagePreview').style.backgroundImage = `url(${e.target.result})`;
+    }
+    reader.readAsDataURL(event.target.files[0]);
+}
+
+function updatePasswordStrength(event) {
+    const password = event.target.value;
+    const strengthBadge = document.getElementById('passwordStrength');
+    const strengths = {
+        0: 'Very Weak',
+        1: 'Weak',
+        2: 'Moderate',
+        3: 'Strong',
+        4: 'Very Strong'
+    };
+
+    let strength = 0;
+    if (password.match(/[a-z]+/)) strength++;
+    if (password.match(/[A-Z]+/)) strength++;
+    if (password.match(/[0-9]+/)) strength++;
+    if (password.match(/[$@#&!]+/)) strength++;
+
+    if (strengthBadge) {
+        strengthBadge.textContent = strengths[Math.min(strength, 4)];
+        strengthBadge.className = `badge ${['bg-danger', 'bg-warning', 'bg-info', 'bg-primary', 'bg-success'][strength]}`;
+    }
+}
+
+function initializeProfileManagement() {
+    const avatarUpload = document.getElementById('avatarUpload');
+    const passwordInput = document.querySelector('input[name="new_password"]');
+
+    if (avatarUpload) {
+        avatarUpload.addEventListener('change', handleAvatarUpload);
+    }
+
+    if (passwordInput) {
+        passwordInput.addEventListener('input', updatePasswordStrength);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', initializeProfileManagement);

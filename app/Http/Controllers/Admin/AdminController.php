@@ -150,7 +150,7 @@ class AdminController extends Controller
     private function storeImage(Request $request): string
     {
         $imageName = time() . '.' . $request->cover->getClientOriginalExtension();
-        $request->cover->move(public_path('img'), $imageName); // Store in public/img
-        return 'img/' . $imageName; // Return path relative to public
+        $request->cover->move(public_path('img'), $imageName);
+        return 'img/' . $imageName;
     }
 }

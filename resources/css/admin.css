@@ -10,3 +10,22 @@ html {
     top: 50%;
     transform: translateY(-50%);
 }
+
+/** USER RELATED */
+.avatar-upload {
+    position: relative;
+    max-width: 200px;
+    margin: 0 auto;
+}
+.avatar-preview {
+    width: 150px;
+    height: 150px;
+    background-size: cover;
+    background-position: center;
+    border: 3px solid #dee2e6;
+    transition: all 0.3s ease;
+}
+.avatar-preview:hover {
+    transform: scale(1.05);
+    border-color: #0d6efd;
+}
