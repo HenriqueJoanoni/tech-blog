@@ -10,7 +10,7 @@ function updateVisibility(event, postId) {
     const button = event.currentTarget;
     const icon = button.querySelector('i');
 
-    fetch(`/posts/${postId}/toggle-visibility`, {
+    fetch(`/admin/${postId}/toggle-visibility`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
