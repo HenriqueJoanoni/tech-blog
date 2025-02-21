@@ -10,6 +10,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use function Webmozart\Assert\Tests\StaticAnalysis\email;
 
 class UserController extends Controller
@@ -21,31 +22,34 @@ class UserController extends Controller
         ]);
     }
 
-    public function updateProfile(Request $request): RedirectResponse
+    public function updateProfile(Request $request)
     {
-        $data = $this->normalizeData($request->all());
+//        dd($request->all());
+        $user = auth()->user();
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . auth()->id(),
-            'bio' => 'nullable|string|max:1000',
-            'new_password' => 'nullable|string|min:8|confirmed',
+            'email' => 'required|email|unique:users,email,'.$user->id,
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'new_password' => 'nullable|confirmed|min:8',
         ]);
 
-        $user = auth()->user();
-        $user->name = $data['name'];
-        $user->email = $data['email'];
-        $user->bio = $data['bio'];
+        if ($request->hasFile('avatar')) {
+            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                Storage::disk('public')->delete($user->avatar);
+            }
 
-        if (!empty($data['new_password'])) {
-            $user->password = Hash::make($data['new_password']);
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $user->avatar = $path;
         }
 
-        $user->save();
+        if ($request->filled('new_password')) {
+            $user->password = Hash::make($request->new_password);
+        }
 
-        return redirect()
-            ->route('admin.user-profile', [auth()->id()])
-            ->with('success', 'Profile updated successfully!');
+        $user->update($request->only('name', 'email', 'bio'));
+
+        return back()->with('success', 'Profile updated successfully');
     }
 
     private function normalizeData(array $data): array

@@ -8,7 +8,7 @@
     <div class="sidebar">
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
-                <img src="{{ Vite::asset('resources/img/profile.png') }}" class="img-circle elevation-2"
+                <img src="{{ auth()->user()->avatar ? asset('storage/'.auth()->user()->avatar) : asset('avatars/profile.png') }}" class="img-circle elevation-2"
                      alt="User Image">
             </div>
             <div class="info">

@@ -22,15 +22,13 @@
                                     <div class="avatar-upload">
                                         <div class="avatar-preview rounded-circle shadow-sm">
                                             <div id="imagePreview"
-                                                 style="background-image: url('{{ asset(auth()->user()->avatar ?? 'assets/images/default-avatar.png') }}');">
+                                                 style="background-image: url('{{ auth()->user()->avatar ? asset('storage/'.auth()->user()->avatar) : asset('assets/avatars/profile.png') }}');">
                                             </div>
                                         </div>
                                         <button type="button" class="btn btn-sm btn-outline-primary mt-3"
                                                 onclick="document.getElementById('avatarUpload').click()">
                                             <i class="fas fa-camera"></i> Change Photo
                                         </button>
-                                        <input type="file" id="avatarUpload" name="avatar"
-                                               class="d-none" accept="image/*">
                                     </div>
 
                                     <h4 class="mt-3 mb-0">{{ auth()->user()->name }}</h4>
@@ -47,6 +45,9 @@
                                 <form action="{{ route('admin.update-profile') }}" method="POST" enctype="multipart/form-data">
                                     @csrf
                                     @method('PUT')
+
+                                    <input type="file" id="avatarUpload" name="avatar"
+                                           class="d-none" accept="image/*" onchange="handleAvatarUpload(event)">
 
                                     <div class="row g-4">
                                         <div class="col-md-6">

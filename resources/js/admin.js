@@ -36,11 +36,19 @@ function updateVisibility(event, postId) {
 
 /** USER RELATED */
 function handleAvatarUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
     const reader = new FileReader();
+    const preview = document.getElementById('imagePreview');
+
     reader.onload = function(e) {
-        document.getElementById('imagePreview').style.backgroundImage = `url(${e.target.result})`;
+        preview.style.backgroundImage = `url(${e.target.result})`;
+        preview.style.display = 'none';
+        preview.offsetHeight;
+        preview.style.display = 'block';
     }
-    reader.readAsDataURL(event.target.files[0]);
+    reader.readAsDataURL(file);
 }
 
 function updatePasswordStrength(event) {
