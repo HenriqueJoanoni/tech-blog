@@ -22,9 +22,8 @@ class UserController extends Controller
         ]);
     }
 
-    public function updateProfile(Request $request)
+    public function updateProfile(Request $request): RedirectResponse
     {
-//        dd($request->all());
         $user = auth()->user();
 
         $request->validate([
@@ -47,7 +46,9 @@ class UserController extends Controller
             $user->password = Hash::make($request->new_password);
         }
 
-        $user->update($request->only('name', 'email', 'bio'));
+        $sanitizedData = $request->only('name', 'email', 'bio');
+
+        $user->update(self::normalizeData($sanitizedData));
 
         return back()->with('success', 'Profile updated successfully');
     }

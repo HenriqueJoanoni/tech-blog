@@ -22,7 +22,7 @@
                                     <div class="avatar-upload">
                                         <div class="avatar-preview rounded-circle shadow-sm">
                                             <div id="imagePreview"
-                                                 style="background-image: url('{{ auth()->user()->avatar ? asset('storage/'.auth()->user()->avatar) : asset('assets/avatars/profile.png') }}');">
+                                                 style="background-image: url('{{ auth()->user()->avatar ? asset('storage/'.auth()->user()->avatar) : asset('avatars/profile.png') }}');">
                                             </div>
                                         </div>
                                         <button type="button" class="btn btn-sm btn-outline-primary mt-3"
