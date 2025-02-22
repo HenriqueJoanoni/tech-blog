@@ -29,6 +29,7 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,'.$user->id,
+            'bio' => 'nullable|string|max:1000',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'new_password' => 'nullable|confirmed|min:8',
         ]);
@@ -46,9 +47,9 @@ class UserController extends Controller
             $user->password = Hash::make($request->new_password);
         }
 
-        $sanitizedData = $request->only('name', 'email', 'bio');
+        $sanitizedData = $this->normalizeData($request->only('name', 'email', 'bio'));
 
-        $user->update(self::normalizeData($sanitizedData));
+        $user->update($sanitizedData);
 
         return back()->with('success', 'Profile updated successfully');
     }

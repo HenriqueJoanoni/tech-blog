@@ -11,6 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('user_permissions', function (Blueprint $table) {
+            $table->id();
+            $table->string('permission_title');
+        });
+
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
@@ -20,9 +25,9 @@ return new class extends Migration
             $table->text('bio')->nullable();
             $table->rememberToken();
             $table->timestamps();
-            $table->boolean('is_admin')->default(0);
             $table->string('avatar')->nullable();
             $table->timestamp('last_login_at')->nullable();
+            $table->foreignId('permission_id')->constrained('user_permissions');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
@@ -46,6 +51,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('user_permissions');
         Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');

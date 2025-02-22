@@ -88,3 +88,18 @@ function initializeProfileManagement() {
 }
 
 document.addEventListener('DOMContentLoaded', initializeProfileManagement);
+
+/** MODAL */
+document.addEventListener('DOMContentLoaded', function() {
+    const bioLinks = document.querySelectorAll('a[data-bs-target="#user-bio-modal"]');
+
+    bioLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            const bio = this.getAttribute('data-bio');
+            const userName = this.getAttribute('data-user-name');
+
+            document.getElementById('user-bio-content').textContent = bio;
+            document.getElementById('user-name').textContent = userName;
+        });
+    });
+});
