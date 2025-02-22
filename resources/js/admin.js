@@ -103,3 +103,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    const permissionsUpdate = document.querySelectorAll('a[data-bs-target="#user-permission-modal"]');
+
+    permissionsUpdate.forEach(link => {
+        link.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            const userName = this.getAttribute('data-user-name');
+            const permissionId = this.getAttribute('data-user-permission-id');
+
+            document.getElementById('user-name').textContent = userName;
+            document.getElementById('current-permission-id').value = permissionId;
+            document.getElementById('user-id').value = userId;
+
+            const permissionDropdown = document.getElementById('permission-dropdown');
+            permissionDropdown.value = permissionId;
+        });
+    });
+});

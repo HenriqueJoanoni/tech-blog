@@ -26,7 +26,7 @@ Route::post('register', [AuthController::class, 'register'])->name('register.pos
 Route::get('logout', [AuthController::class, 'logout'])->name('logout');
 
 /** EDITOR ROUTES */
-Route::middleware(['auth', 'checkPerm:' . env('ACCESS_EDITOR')])->group(function () {
+Route::middleware(['auth', 'checkPerm:' . config('editor_access')])->group(function () {
     /** ADMIN HOMEPAGE */
     Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 
@@ -44,7 +44,7 @@ Route::middleware(['auth', 'checkPerm:' . env('ACCESS_EDITOR')])->group(function
 });
 
 /** ADMIN ROUTES */
-Route::middleware(['auth', 'checkPerm:' . env('ACCESS_ADMIN')])->group(function () {
+Route::middleware(['auth', 'checkPerm:' . config('admin_access')])->group(function () {
     /** ADMIN HOMEPAGE */
     Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 
@@ -61,11 +61,17 @@ Route::middleware(['auth', 'checkPerm:' . env('ACCESS_ADMIN')])->group(function 
     Route::post('/admin/{id}/toggle-visibility', [AdminController::class, 'toggleVisibility'])->name('admin.toggle-visibility');
 
     /** USER RELATED ROUTES */
-    Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
+    Route::get('/admin/users', [UserController::class, 'users'])->name('admin.users');
     Route::get('/admin/logout', [AuthController::class, 'logout'])->name('admin.logout');
+
     Route::get('/admin/user-profile/{id}', [UserController::class, 'userProfile'])->name('admin.user-profile');
     Route::put('/admin/user-profile', [UserController::class, 'updateProfile'])->name('admin.update-profile');
-    Route::get('/admin/user/create', [AdminController::class, 'createUser'])->name('admin.create-user');
-    Route::get('/admin/user/delete-user/{id}', [AdminController::class, 'deleteUser'])->name('admin.delete-user');
-    Route::get('/admin/user/reset-password/{id}', [AdminController::class, 'resetPassword'])->name('admin.reset-password');
+
+    Route::get('/admin/user/create', [UserController::class, 'createUser'])->name('admin.create-user');
+    Route::post('/admin/user/store', [UserController::class, 'storeUser'])->name('admin.store-user');
+    Route::get('/admin/user/delete-user/{id}', [UserController::class, 'deleteUser'])->name('admin.delete-user');
+    Route::get('/admin/user/edit-user/{id}', [UserController::class, 'editUser'])->name('admin.edit-user');
+    Route::put('/admin/user/edit-user', [UserController::class, 'updateUser'])->name('admin.update-user');
+    Route::get('/admin/user/reset-password/{id}', [UserController::class, 'resetPassword'])->name('admin.reset-password');
+    Route::post('/admin/update-permissions', [UserController::class, 'updatePermissions'])->name('admin.update-permissions');
 });
