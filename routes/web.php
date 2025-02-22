@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\MailController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /** PUBLIC ROUTES */
@@ -24,10 +25,12 @@ Route::post('register', [AuthController::class, 'register'])->name('register.pos
 
 Route::get('logout', [AuthController::class, 'logout'])->name('logout');
 
-/** ADMIN ROUTES */
-Route::middleware(['auth', 'admin'])->group(function () {
+/** EDITOR ROUTES */
+Route::middleware(['auth', 'checkPerm:' . env('ACCESS_EDITOR')])->group(function () {
+    /** ADMIN HOMEPAGE */
     Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-    Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
+
+    /** POSTS RELATED ROUTES */
     Route::get('/admin/posts-management', [AdminController::class, 'managePosts'])->name('admin.posts-management');
 
     Route::get('/admin/posts/create', [AdminController::class, 'createPost'])->name('admin.create-posts');
@@ -37,8 +40,32 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/edit-post', [AdminController::class, 'updatePost'])->name('admin.update-post');
 
     Route::get('/admin/delete-post/{id}', [AdminController::class, 'deletePost'])->name('admin.delete-post');
+    Route::post('/admin/{id}/toggle-visibility', [AdminController::class, 'toggleVisibility'])->name('admin.toggle-visibility');
+});
 
+/** ADMIN ROUTES */
+Route::middleware(['auth', 'checkPerm:' . env('ACCESS_ADMIN')])->group(function () {
+    /** ADMIN HOMEPAGE */
+    Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+
+    /** POSTS RELATED ROUTES */
+    Route::get('/admin/posts-management', [AdminController::class, 'managePosts'])->name('admin.posts-management');
+
+    Route::get('/admin/posts/create', [AdminController::class, 'createPost'])->name('admin.create-posts');
+    Route::post('/admin/posts/store', [AdminController::class, 'storePost'])->name('admin.store-post');
+
+    Route::get('/admin/edit-post/{id}', [AdminController::class, 'editPost'])->name('admin.edit-post');
+    Route::post('/admin/edit-post', [AdminController::class, 'updatePost'])->name('admin.update-post');
+
+    Route::get('/admin/delete-post/{id}', [AdminController::class, 'deletePost'])->name('admin.delete-post');
     Route::post('/admin/{id}/toggle-visibility', [AdminController::class, 'toggleVisibility'])->name('admin.toggle-visibility');
 
+    /** USER RELATED ROUTES */
+    Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
     Route::get('/admin/logout', [AuthController::class, 'logout'])->name('admin.logout');
+    Route::get('/admin/user-profile/{id}', [UserController::class, 'userProfile'])->name('admin.user-profile');
+    Route::put('/admin/user-profile', [UserController::class, 'updateProfile'])->name('admin.update-profile');
+    Route::get('/admin/user/create', [AdminController::class, 'createUser'])->name('admin.create-user');
+    Route::get('/admin/user/delete-user/{id}', [AdminController::class, 'deleteUser'])->name('admin.delete-user');
+    Route::get('/admin/user/reset-password/{id}', [AdminController::class, 'resetPassword'])->name('admin.reset-password');
 });

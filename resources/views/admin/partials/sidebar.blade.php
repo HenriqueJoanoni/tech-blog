@@ -8,11 +8,11 @@
     <div class="sidebar">
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
-                <img src="{{ Vite::asset('resources/img/profile.png') }}" class="img-circle elevation-2"
+                <img src="{{ auth()->user()->avatar ? asset('storage/'.auth()->user()->avatar) : asset('avatars/profile.png') }}" class="img-circle elevation-2"
                      alt="User Image">
             </div>
             <div class="info">
-                <a href="#" class="d-block">Admin User</a>
+                <a href="{{ route('admin.user-profile', auth()->id()) }}" class="d-block">Welcome {{ auth()->user()->name }}</a>
             </div>
         </div>
 
@@ -24,24 +24,28 @@
                         <p>Dashboard</p>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="{{ route('admin.users') }}" class="nav-link">
-                        <i class="nav-icon fas fa-user"></i>
-                        <p>Manage Users</p>
-                    </a>
-                </li>
+                @if(auth()->user()->permission_id == config('app.admin_access'))
+                    <li class="nav-item">
+                        <a href="{{ route('admin.users') }}" class="nav-link">
+                            <i class="nav-icon fas fa-user"></i>
+                            <p>Manage Users</p>
+                        </a>
+                    </li>
+                @endif
                 <li class="nav-item">
                     <a href="{{ route('admin.posts-management') }}" class="nav-link">
                         <i class="nav-icon fas fa-book"></i>
                         <p>Manage Posts</p>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fas fa-cog"></i>
-                        <p>Settings</p>
-                    </a>
-                </li>
+                @if(auth()->user()->permission_id == config('app.admin_access'))
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-cog"></i>
+                            <p>Settings</p>
+                        </a>
+                    </li>
+                @endif
                 <li class="nav-item">
                     <a href="{{ route('admin.logout') }}" class="nav-link">
                         <i class="nav-icon fas fa-door-open"></i>

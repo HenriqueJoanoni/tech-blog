@@ -6,15 +6,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Category extends Model
+class Permission extends Model
 {
     use HasFactory;
+
+    protected $table = 'user_permissions';
+
     public $timestamps = false;
 
-    protected $fillable = ['category_title'];
+    protected $fillable = ['permission_title'];
 
-    public function posts(): HasMany
+    public function users(): HasMany
     {
-        return $this->hasMany(Post::class, 'category_id');
+        return $this->hasMany(User::class, 'permission_id');
     }
 }

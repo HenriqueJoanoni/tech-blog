@@ -1,3 +1,4 @@
+@php use App\Helpers\GeneralHandler; @endphp
 @extends('layouts.admin')
 
 @section('page_title', 'Posts Management')
@@ -36,8 +37,8 @@
                                 <td><?= $post->views ?? "N/A" ?></td>
                                 <td><?= $post->category->category_name ?></td>
                                 <td><?= $post->author ?></td>
-                                <td><?= \App\Helpers\GeneralHandler::dateFmt($post->created_at, 'd/m/Y') ?></td>
-                                <td><?= \App\Helpers\GeneralHandler::dateFmt($post->updated_at, 'd/m/Y') ?></td>
+                                <td><?= GeneralHandler::dateFmt($post->created_at, 'd/m/Y') ?></td>
+                                <td><?= GeneralHandler::dateFmt($post->updated_at, 'd/m/Y') ?></td>
                                 <td>
                                     <button type="button"
                                             class="btn btn-warning"
@@ -48,10 +49,12 @@
                                             <i class="fa fa-eye"></i>
                                         @endif
                                     </button>
-                                    <a href="{{ route('admin.edit-post', ['id' => $post->id]) }}" class="btn btn-primary" title="Edit">
+                                    <a href="{{ route('admin.edit-post', ['id' => $post->id]) }}"
+                                       class="btn btn-primary" title="Edit">
                                         <i class="fa fa-pencil"></i>
                                     </a>
-                                    <a href="{{ route('admin.delete-post', ['id' => $post->id]) }}" class="btn btn-danger" title="Delete">
+                                    <a href="{{ route('admin.delete-post', ['id' => $post->id]) }}"
+                                       class="btn btn-danger" title="Delete">
                                         <i class="fa fa-trash"></i>
                                     </a>
                                 </td>

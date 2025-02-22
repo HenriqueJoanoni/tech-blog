@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class AdminController extends Controller
@@ -21,7 +23,40 @@ class AdminController extends Controller
 
     public function users(): Factory|Application|View
     {
-        return \view('admin.users');
+        $users = User::all();
+
+        return \view('admin.users', [
+            'users' => $users
+        ]);
+    }
+
+    public function createUser(): View|Factory|Application
+    {
+        return \view('admin.create-user');
+    }
+
+    public function deleteUser(Request $request): RedirectResponse
+    {
+        try {
+            User::destroy($request->id);
+            return redirect()->route('admin.users')->with('success', 'Post deleted successfully.');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.users')->with('error', 'Failed to delete the post.');
+        }
+    }
+
+    public function resetPassword(Request $request): RedirectResponse
+    {
+        try {
+            $user = User::find($request->id);
+            if ($user) {
+                $user->password = Hash::make(config('app.default_user_password'));
+                $user->save();
+            }
+            return redirect()->route('admin.users')->with('success', 'Password reset successfully.');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.users')->with('error', 'Failed to reset the password.');
+        }
     }
 
     public function managePosts():Factory|Application|View
@@ -150,7 +185,7 @@ class AdminController extends Controller
     private function storeImage(Request $request): string
     {
         $imageName = time() . '.' . $request->cover->getClientOriginalExtension();
-        $request->cover->move(public_path('img'), $imageName); // Store in public/img
-        return 'img/' . $imageName; // Return path relative to public
+        $request->cover->move(public_path('img'), $imageName);
+        return 'img/' . $imageName;
     }
 }

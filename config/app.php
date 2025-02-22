@@ -123,4 +123,11 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /** CUSTOM CONSTANTS */
+    'default_user_password' => env('DEFAULT_USER_PASSWORD', '12345678'),
+
+    'admin_access' => env('ACCESS_ADMIN', 1),
+    'editor_access' => env('ACCESS_EDITOR', 2),
+    'viewer_access' => env('ACCESS_VIEWER', 3),
+
 ];
