@@ -49,7 +49,19 @@
                                 <td><?= ($user->last_login_at) ? GeneralHandler::dateFmt($user->last_login_at, 'd/m/Y H:i:s') : "N/A" ?></td>
                                 <td>{{ $user->permission->permission_title }}</td>
                                 <td>
-                                    <a href="{{ route('admin.reset-password', ['id' => $user->id]) }}" class="btn btn-info" title="Edit">
+                                    <a href="#" class="btn btn-warning"
+                                       data-bs-toggle="modal"
+                                       data-bs-target="#user-permission-modal"
+                                       data-user-id="{{ $user->id }}"
+                                       data-user-name="{{ $user->name }}"
+                                       data-user-permission-id="{{ $user->permission_id }}"
+                                       title="Change permissions">
+                                        <i class="fa-solid fa-users-gear"></i>
+                                    </a>
+                                    <a href="{{ route('admin.edit-user', ['id' => $user->id]) }}" class="btn btn-primary" title="Edit user">
+                                        <i class="fa fa-user"></i>
+                                    </a>
+                                    <a href="{{ route('admin.reset-password', ['id' => $user->id]) }}" class="btn btn-info" title="Reset password">
                                         <i class="fa fa-lock-open"></i>
                                     </a>
                                     <a href="{{ route('admin.delete-user', ['id' => $user->id]) }}" class="btn btn-danger" title="Delete">
@@ -64,4 +76,5 @@
             </div>
         </div>
     @include('admin.partials.user-bio-modal')
+    @include('admin.partials.user-permissions-modal')
 @endsection
