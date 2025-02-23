@@ -53,10 +53,9 @@
                                        class="btn btn-primary" title="Edit">
                                         <i class="fa fa-pencil"></i>
                                     </a>
-                                    <a href="{{ route('admin.delete-post', ['id' => $post->id]) }}"
-                                       class="btn btn-danger" title="Delete">
+                                    <button class="btn btn-danger delete-post-btn" data-post-id="{{ $post->id }}" data-post-name="{{ $post->title }}">
                                         <i class="fa fa-trash"></i>
-                                    </a>
+                                    </button>
                                 </td>
                             </tr>
                         @endforeach
@@ -66,4 +65,35 @@
             </div>
         </div>
     </div>
+    @if(session('success'))
+        <script>
+            const Toast = Swal.mixin({
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.onmouseenter = Swal.stopTimer;
+                    toast.onmouseleave = Swal.resumeTimer;
+                }
+            });
+
+            Toast.fire({
+                icon: "success",
+                title: "{{session('success')}}"
+            })
+        </script>
+    @endif
+
+    @if(session('error'))
+        <script>
+            Swal.fire({
+                title: 'Error!',
+                text: '{{ session('error') }}',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        </script>
+    @endif
 @endsection

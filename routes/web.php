@@ -57,7 +57,7 @@ Route::middleware(['auth', 'checkPerm:' . config('admin_access')])->group(functi
     Route::get('/admin/edit-post/{id}', [AdminController::class, 'editPost'])->name('admin.edit-post');
     Route::post('/admin/edit-post', [AdminController::class, 'updatePost'])->name('admin.update-post');
 
-    Route::get('/admin/delete-post/{id}', [AdminController::class, 'deletePost'])->name('admin.delete-post');
+    Route::delete('/admin/delete-post/{id}', [AdminController::class, 'deletePost'])->name('admin.delete-post');
     Route::post('/admin/{id}/toggle-visibility', [AdminController::class, 'toggleVisibility'])->name('admin.toggle-visibility');
 
     /** USER RELATED ROUTES */
@@ -69,7 +69,7 @@ Route::middleware(['auth', 'checkPerm:' . config('admin_access')])->group(functi
 
     Route::get('/admin/user/create', [UserController::class, 'createUser'])->name('admin.create-user');
     Route::post('/admin/user/store', [UserController::class, 'storeUser'])->name('admin.store-user');
-    Route::get('/admin/user/delete-user/{id}', [UserController::class, 'deleteUser'])->name('admin.delete-user');
+    Route::delete('/admin/user/delete-user/{id}', [UserController::class, 'deleteUser'])->name('admin.delete-user');
     Route::get('/admin/user/edit-user/{id}', [UserController::class, 'editUser'])->name('admin.edit-user');
     Route::put('/admin/user/edit-user', [UserController::class, 'updateUser'])->name('admin.update-user');
     Route::get('/admin/user/reset-password/{id}', [UserController::class, 'resetPassword'])->name('admin.reset-password');

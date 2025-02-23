@@ -8,6 +8,7 @@ use App\Models\Post;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -108,13 +109,13 @@ class AdminController extends Controller
         return redirect()->route('admin.posts-management')->with('success', 'Post updated successfully');
     }
 
-    public function deletePost(Request $request): RedirectResponse
+    public function deletePost(Request $request): JsonResponse
     {
         try {
             Post::destroy($request->id);
-            return redirect()->route('admin.posts-management')->with('success', 'Post deleted successfully.');
+            return response()->json(['success' => true, 'message' => 'Post deleted successfully.']);
         } catch (\Exception $e) {
-            return redirect()->route('admin.posts-management')->with('error', 'Failed to delete the post.');
+            return response()->json(['success' => false, 'message' => 'Failed to delete this post.'], 500);
         }
     }
 
