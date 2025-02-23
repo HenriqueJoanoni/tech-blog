@@ -6,7 +6,6 @@
                 <h1 class="modal-title fs-5" id="exampleModalLabel">
                     Updating permissions of <b><span id="user-name"></span></b>
                 </h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="update-permission-form" action="{{ route('admin.update-permissions') }}" method="POST">
                 <div class="modal-body">
