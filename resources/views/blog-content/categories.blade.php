@@ -19,26 +19,19 @@
             </p>
 
             <!-- Categories Grid -->
-            <!-- TODO: CREATE CATEGORIES TABLE AND LINK THEM TO POSTS TABLE -->
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                @php
-                    $categories = [
-                        ['name' => 'Artificial Intelligence', 'icon' => '🤖'],
-                        ['name' => 'Cybersecurity', 'icon' => '🔒'],
-                        ['name' => 'Software Development', 'icon' => '💻'],
-                        ['name' => 'Cloud Computing', 'icon' => '☁️'],
-                        ['name' => 'Tech Gadgets', 'icon' => '📱'],
-                        ['name' => 'Gaming & VR', 'icon' => '🎮'],
-                    ];
-                @endphp
-
                 @foreach ($categories as $category)
                     <div class="bg-white shadow-lg rounded-lg p-6 hover:shadow-xl transition">
-                        <div class="text-4xl">{{ $category['icon'] }}</div>
-                        <h3 class="text-xl font-semibold text-gray-800 mt-4">{{ $category['name'] }}</h3>
-                        <p class="text-gray-600 mt-2">Explore the latest trends and updates in {{ $category['name'] }}
-                            .</p>
-                        <a href="#" class="mt-4 inline-block text-blue-600 font-semibold hover:underline">
+                        <!-- Center the icon using Flexbox -->
+                        <div class="flex justify-center items-center text-4xl">
+                            <img src="{{ Vite::asset($category->icon) }}" alt="{{ $category->category_name }}"
+                                 class="w-12 h-12">
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800 mt-4">{{ $category->category_name }}</h3>
+                        <p class="text-gray-600 mt-2">Explore the latest trends and updates
+                            in {{ $category->category_name }}.</p>
+                        <a href="{{ route('blog.all-posts-per-category', ['categorySlug' => $category->category_slug]) }}"
+                           class="mt-4 inline-block text-blue-600 font-semibold hover:underline">
                             Read More →
                         </a>
                     </div>
