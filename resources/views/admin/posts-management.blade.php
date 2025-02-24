@@ -32,9 +32,9 @@
                         @foreach($posts as $post)
                             <tr>
                                 <th scope="row"><?= $post->id ?></th>
-                                <td><?= $post->title ?></td>
-                                <td><?= $post->excerpt ?></td>
-                                <td><?= $post->views ?? "N/A" ?></td>
+                                <td><?= GeneralHandler::str_limit_words($post->title, 4) ?></td>
+                                <td><?= GeneralHandler::str_limit_words($post->excerpt, 4) ?></td>
+                                <td><?= $post->views ?? 0 ?></td>
                                 <td><?= $post->category->category_name ?></td>
                                 <td><?= $post->author ?></td>
                                 <td><?= GeneralHandler::dateFmt($post->created_at, 'd/m/Y') ?></td>
@@ -62,6 +62,9 @@
                         @endforeach
                         </tbody>
                     </table>
+                    <div class="align-self-center">
+                        {{ $posts->links('vendor.pagination.bootstrap-5') }}
+                    </div>
                 </div>
             </div>
         </div>
