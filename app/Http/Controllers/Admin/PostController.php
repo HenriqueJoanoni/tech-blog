@@ -12,7 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
-class AdminController extends Controller
+class PostController extends Controller
 {
     public function dashboard(): View|Factory|Application
     {
@@ -21,7 +21,11 @@ class AdminController extends Controller
 
     public function managePosts():Factory|Application|View
     {
-        $posts = Post::all();
+        if (strtolower(auth()->user()->name) == 'admin') {
+            $posts = Post::all();
+        } else {
+            $posts = Post::where('author', auth()->id())->get();
+        }
 
         return \view('admin.posts-management', [
             'posts' => $posts
@@ -44,7 +48,6 @@ class AdminController extends Controller
             'excerpt' => 'required|string|max:255',
             'postContent' => 'required|string',
             'category_id' => 'required|exists:categories,id',
-            'author' => 'required|string|max:255',
             'cover' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
@@ -62,7 +65,7 @@ class AdminController extends Controller
             'content' => $request->postContent,
             'image' => $imagePath,
             'category_id' => $request->category_id,
-            'author' => $request->author,
+            'author' => auth()->id()
         ]);
 
         return redirect()->route('admin.posts-management')->with('success', 'Post created successfully');
@@ -86,7 +89,6 @@ class AdminController extends Controller
             'excerpt' => 'required|string|max:255',
             'content' => 'required|string',
             'category_id' => 'required|exists:categories,id',
-            'author' => 'required|string|max:255',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
@@ -138,7 +140,6 @@ class AdminController extends Controller
             'excerpt' => htmlspecialchars($data['excerpt']),
             'content' => htmlspecialchars($data['content']),
             'category_id' => $data['category_id'],
-            'author' => htmlspecialchars($data['author']),
         ];
     }
 

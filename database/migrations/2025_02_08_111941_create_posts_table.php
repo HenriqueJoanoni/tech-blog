@@ -24,7 +24,11 @@ return new class extends Migration
                 ->references('id')
                 ->on('categories')
                 ->onDelete('set null');
-            $table->string('author')->nullable();
+            $table->unsignedBigInteger('author')->nullable();
+            $table->foreign('author')
+                ->references('id')
+                ->on('users')
+                ->onDelete('set null');
             $table->integer('is_visible')->default(0);
             $table->timestamps();
         });

@@ -34,7 +34,7 @@
                                 <th scope="row"><?= $post->id ?></th>
                                 <td><?= $post->title ?></td>
                                 <td><?= $post->excerpt ?></td>
-                                <td><?= $post->views ?? "N/A" ?></td>
+                                <td><?= $post->views ?? 0 ?></td>
                                 <td><?= $post->category->category_name ?></td>
                                 <td><?= $post->author ?></td>
                                 <td><?= GeneralHandler::dateFmt($post->created_at, 'd/m/Y') ?></td>

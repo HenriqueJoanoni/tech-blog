@@ -15,8 +15,12 @@ class CategoriesSeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            ['category_name' => 'Technology'],
-            ['category_name' => 'Programming'],
+            ['category_name' => 'Artificial Intelligence'],
+            ['category_name' => 'Cybersecurity'],
+            ['category_name' => 'Software Development'],
+            ['category_name' => 'Cloud Computing'],
+            ['category_name' => 'Tech Gadgets'],
+            ['category_name' => 'Gaming & VR'],
         ];
 
         foreach ($categories as $category) {

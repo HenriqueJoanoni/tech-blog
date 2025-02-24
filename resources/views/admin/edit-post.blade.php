@@ -56,13 +56,6 @@
                                 </select>
                             </div>
 
-                            <!-- Author Field -->
-                            <div class="form-group mb-3">
-                                <label for="postAuthor">Author</label>
-                                <input type="text" name="author" id="postAuthor" class="form-control"
-                                       value="{{ old('author', $post[0]->author) }}">
-                            </div>
-
                             <!-- Buttons -->
                             <div class="text-center mt-4">
                                 <button type="submit" class="btn btn-success">Edit Post</button>
