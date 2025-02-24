@@ -22,14 +22,12 @@ class PostController extends Controller
     public function managePosts():Factory|Application|View
     {
         if (strtolower(auth()->user()->name) == 'admin') {
-            $posts = Post::all();
+            $posts = Post::paginate(10);
         } else {
             $posts = Post::where('author', auth()->id())->get();
         }
 
-        return \view('admin.posts-management', [
-            'posts' => $posts
-        ]);
+        return \view('admin.posts-management', compact('posts'));
     }
 
     public function createPost(): View|Factory|Application

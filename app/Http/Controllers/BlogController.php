@@ -18,13 +18,13 @@ class BlogController extends Controller
     {
         $latestPosts = Post::latest()->take(5)->get();
         $trendingPosts = Post::orderBy('views', 'desc')->take(4)->get();
-        $technologyCategory = Category::where('category_name', 'Technology')->first();
-        $technologyPosts = Post::where('category_id', $technologyCategory->id)
+        $softwareDevCategory = Category::where('category_name', 'Software Development')->first();
+        $softwareDevPosts = Post::where('category_id', $softwareDevCategory->id)
             ->latest()
             ->take(4)
             ->get();
 
-        return view('home', compact('latestPosts', 'trendingPosts', 'technologyPosts'));
+        return view('home', compact('latestPosts', 'trendingPosts', 'softwareDevPosts'));
     }
 
     /**

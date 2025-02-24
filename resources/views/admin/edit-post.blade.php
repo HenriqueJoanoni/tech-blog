@@ -56,6 +56,15 @@
                                 </select>
                             </div>
 
+                            @if(auth()->user()->permission_id == config('app.admin_access'))
+                                <!-- Author Field -->
+                                <div class="form-group mb-3">
+                                    <label for="postAuthor">Author</label>
+                                    <input type="text" name="author" id="postAuthor" class="form-control" disabled
+                                           value="{{ old('author', $post[0]->user->name) }}">
+                                </div>
+                            @endif
+
                             <!-- Buttons -->
                             <div class="text-center mt-4">
                                 <button type="submit" class="btn btn-success">Edit Post</button>
