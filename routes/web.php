@@ -16,6 +16,8 @@ Route::post('/send-mail', [MailController::class, 'sendMail'])->name('blog.sendM
 
 Route::get('/post/{slug}/{id}', [BlogController::class, 'show'])->name('blog.post');
 
+Route::get('/all-posts/{categorySlug}', [BlogController::class, 'getAllPostsPerCategory'])->name('blog.all-posts-per-category');
+
 /** AUTH ROUTES */
 Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('login', [AuthController::class, 'login'])->name('login.post');

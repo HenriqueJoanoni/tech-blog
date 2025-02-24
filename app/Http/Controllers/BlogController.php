@@ -35,7 +35,9 @@ class BlogController extends Controller
      */
     public function categories(Request $request): View|Factory|Application
     {
-        return view('blog-content.categories');
+        $categories = Category::all();
+
+        return view('blog-content.categories', compact('categories'));
     }
 
     /**
@@ -71,5 +73,25 @@ class BlogController extends Controller
         return view('blog-content.show-post', [
             'post_id' => $request->get('id'),
         ]);
+    }
+
+    /**
+     * Show all the posts from a specific category
+     *
+     * @param Request $request
+     * @param $categorySlug
+     * @return View|Factory|Application
+     */
+    public function getAllPostsPerCategory(Request $request, $categorySlug): View|Factory|Application
+    {
+        $category = Category::where('category_slug', $categorySlug)->first();
+
+        if (!$category) {
+            abort(404, 'Category not found');
+        }
+
+        $postsPerCategory = $category->posts;
+
+        return view('blog-content.all-posts', compact('postsPerCategory', 'category'));
     }
 }
