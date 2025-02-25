@@ -16,12 +16,15 @@ class BlogController extends Controller
      */
     public function home(): View|Factory|Application
     {
-        $latestPosts = Post::latest()->take(5)->get();
-        $trendingPosts = Post::orderBy('views', 'desc')->take(4)->get();
+        $latestPosts = Post::where('is_visible', 1)->latest()->take(5)->get();
+        $trendingPosts = Post::where('is_visible', 1)->orderBy('views', 'desc')->take(4)->get();
         $softwareDevCategory = Category::where('category_name', 'Software Development')->first();
-        $softwareDevPosts = Post::where('category_id', $softwareDevCategory->id)
+        $softwareDevPosts = Post::where([
+            ['category_id', $softwareDevCategory->id],
+            ['is_visible', 1]
+        ])
             ->latest()
-            ->take(4)
+            ->take(6)
             ->get();
 
         return view('home', compact('latestPosts', 'trendingPosts', 'softwareDevPosts'));
@@ -30,10 +33,9 @@ class BlogController extends Controller
     /**
      * Show the categories page
      *
-     * @param Request $request
      * @return View|Factory|Application
      */
-    public function categories(Request $request): View|Factory|Application
+    public function categories(): View|Factory|Application
     {
         $categories = Category::all();
 
@@ -43,10 +45,9 @@ class BlogController extends Controller
     /**
      * Show the about page
      *
-     * @param Request $request
      * @return View|Factory|Application
      */
-    public function about(Request $request): View|Factory|Application
+    public function about(): View|Factory|Application
     {
         return view('blog-content.about');
     }
@@ -54,10 +55,9 @@ class BlogController extends Controller
     /**
      * Show the contact page
      *
-     * @param Request $request
      * @return View|Factory|Application
      */
-    public function contact(Request $request): View|Factory|Application
+    public function contact(): View|Factory|Application
     {
         return view('blog-content.contact');
     }
@@ -65,24 +65,26 @@ class BlogController extends Controller
     /**
      * Show the clicked post
      *
-     * @param Request $request
+     * @param string $slug
+     * @param int $id
      * @return View|Factory|Application
      */
-    public function show(Request $request): View|Factory|Application
+    public function show(string $slug, int $id): View|Factory|Application
     {
+        $postData = Post::where('id', $id)->first();
+
         return view('blog-content.show-post', [
-            'post_id' => $request->get('id'),
+            'postData' => $postData,
         ]);
     }
 
     /**
      * Show all the posts from a specific category
      *
-     * @param Request $request
      * @param $categorySlug
      * @return View|Factory|Application
      */
-    public function getAllPostsPerCategory(Request $request, $categorySlug): View|Factory|Application
+    public function getAllPostsPerCategory($categorySlug): View|Factory|Application
     {
         $category = Category::where('category_slug', $categorySlug)->first();
 
@@ -90,7 +92,7 @@ class BlogController extends Controller
             abort(404, 'Category not found');
         }
 
-        $postsPerCategory = $category->posts;
+        $postsPerCategory = $category->posts->where('is_visible', 1);
 
         return view('blog-content.all-posts', compact('postsPerCategory', 'category'));
     }

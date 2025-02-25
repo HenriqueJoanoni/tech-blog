@@ -22,6 +22,6 @@ class MailController extends Controller
 
         Mail::to(env('MAIL_SEND_TO'))->send(new SendMail($details));
 
-        return redirect('/contact')->with('success', 'Email enviado');
+        return redirect('/contact')->with('success', 'Email sent');
     }
 }
