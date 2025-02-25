@@ -28,13 +28,25 @@ class DatabaseSeeder extends Seeder
         ]);
 
         User::create([
-            'name' => 'Editor',
-            'email' => 'editor@editor.com',
+            'name' => 'Author1',
+            'email' => 'author1@editor.com',
+            'password' => Hash::make('password'),
+            'permission_id' => $editor->id,
+        ]);
+
+        User::create([
+            'name' => 'Author2',
+            'email' => 'author2@editor.com',
             'password' => Hash::make('password'),
             'permission_id' => $editor->id,
         ]);
 
         $this->call(CategoriesSeeder::class);
-        $this->call(PostSeeder::class);
+        $this->call(AIPostSeeder::class);
+        $this->call(CloudPostSeeder::class);
+        $this->call(CybersecurityPostSeeder::class);
+        $this->call(GamingVRPostSeeder::class);
+        $this->call(SoftDevPostSeeder::class);
+        $this->call(TechGadgetsPostSeeder::class);
     }
 }
