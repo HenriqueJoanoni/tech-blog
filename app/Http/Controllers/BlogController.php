@@ -21,7 +21,7 @@ class BlogController extends Controller
         $softwareDevCategory = Category::where('category_name', 'Software Development')->first();
         $softwareDevPosts = Post::where('category_id', $softwareDevCategory->id)
             ->latest()
-            ->take(4)
+            ->take(6)
             ->get();
 
         return view('home', compact('latestPosts', 'trendingPosts', 'softwareDevPosts'));
@@ -66,12 +66,16 @@ class BlogController extends Controller
      * Show the clicked post
      *
      * @param Request $request
+     * @param string $slug
+     * @param int $id
      * @return View|Factory|Application
      */
-    public function show(Request $request): View|Factory|Application
+    public function show(Request $request, string $slug, int $id): View|Factory|Application
     {
+        $postData = Post::where('id', $id)->first();
+
         return view('blog-content.show-post', [
-            'post_id' => $request->get('id'),
+            'postData' => $postData,
         ]);
     }
 
