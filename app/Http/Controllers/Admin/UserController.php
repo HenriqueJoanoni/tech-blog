@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -83,13 +84,13 @@ class UserController extends Controller
         return redirect()->route('admin.users')->with('success', 'User created!');
     }
 
-    public function deleteUser(Request $request): RedirectResponse
+    public function deleteUser(Request $request): JsonResponse
     {
         try {
             User::destroy($request->id);
-            return redirect()->route('admin.users')->with('success', 'Post deleted successfully.');
+            return response()->json(['success' => true, 'message' => 'User deleted successfully.']);
         } catch (\Exception $e) {
-            return redirect()->route('admin.users')->with('error', 'Failed to delete the post.');
+            return response()->json(['success' => false, 'message' => 'Failed to delete the user.'], 500);
         }
     }
 
@@ -203,9 +204,12 @@ class UserController extends Controller
         $normalized = [
             'name' => htmlspecialchars($data['name']),
             'email' => filter_var($data['email'], FILTER_SANITIZE_EMAIL),
-            'bio' => htmlspecialchars($data['bio']),
-            'permission_id' => GeneralHandler::onlyNumbers($data['permission_id'])
+            'bio' => htmlspecialchars($data['bio'])
         ];
+
+        if (isset($data['permission_id'])) {
+            $normalized['permission_id'] = GeneralHandler::onlyNumbers($data['permission_id']);
+        }
 
         if (isset($data['new_password'])) {
             $normalized['new_password'] = $data['new_password'];

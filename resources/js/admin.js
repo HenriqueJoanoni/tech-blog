@@ -30,9 +30,145 @@ function updateVisibility(event, postId) {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error updating visibility');
+            Swal.fire({
+                title: 'Error!',
+                text: 'Error updating visibility',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
         });
 }
+
+function deleteUser() {
+    document.querySelectorAll('.delete-user-btn').forEach(button => {
+        button.addEventListener('click', function (event) {
+            const itemId = this.getAttribute('data-id');
+            const itemName = this.getAttribute('data-name');
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            if (!csrfToken) {
+                console.error('CSRF token not found');
+                return;
+            }
+
+            Swal.fire({
+                title: "Delete: " + itemName + " ?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#007bff",
+                cancelButtonColor: "#dc3545",
+                confirmButtonText: "Delete anyway"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/user/delete-user/${itemId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    title: "Deleted!",
+                                    text: "User " + itemName + " has been deleted.",
+                                    icon: "success"
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: data.message || 'Failed to delete the user.',
+                                    icon: 'error',
+                                    confirmButtonText: 'OK'
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'Error deleting this user',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+                        });
+                }
+            });
+        });
+    });
+}
+
+function deletePost() {
+    document.querySelectorAll('.delete-post-btn').forEach(button => {
+        button.addEventListener('click', function (event) {
+            const itemId = this.getAttribute('data-post-id');
+            const itemName = this.getAttribute('data-post-name');
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            if (!csrfToken) {
+                console.error('CSRF token not found');
+                return;
+            }
+
+            Swal.fire({
+                title: "Delete: " + itemName + " ?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#007bff",
+                cancelButtonColor: "#dc3545",
+                confirmButtonText: "Delete anyway"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/delete-post/${itemId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    title: "Deleted!",
+                                    text: "Post " + itemName + " has been deleted.",
+                                    icon: "success"
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: data.message || 'Failed to delete this post.',
+                                    icon: 'error',
+                                    confirmButtonText: 'OK'
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'Error deleting this post',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+                        });
+                }
+            });
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    deletePost();
+    deleteUser();
+});
 
 /** USER RELATED */
 function handleAvatarUpload(event) {
