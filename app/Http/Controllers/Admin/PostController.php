@@ -119,7 +119,7 @@ class PostController extends Controller
         }
     }
 
-    public function toggleVisibility($id)
+    public function toggleVisibility($id): JsonResponse
     {
         $post = Post::findOrFail($id);
         $post->is_visible = !$post->is_visible;

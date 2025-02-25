@@ -23,6 +23,16 @@ function updateVisibility(event, postId) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Post visibility updated",
+                    toast: true,
+                    position: "top-end",
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+
                 icon.classList.toggle('fa-eye');
                 icon.classList.toggle('fa-eye-slash');
                 button.title = data.is_visible ? 'Hide post' : 'Show post';
