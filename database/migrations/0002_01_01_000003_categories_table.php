@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('category_name');
             $table->string('category_slug');
             $table->string('icon')->nullable();
+            $table->integer('is_available')->default(0);
         });
     }
 

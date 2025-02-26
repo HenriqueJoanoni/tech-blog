@@ -62,6 +62,13 @@ Route::middleware(['auth', 'checkPerm:' . config('admin_access')])->group(functi
     Route::delete('/admin/delete-post/{id}', [PostController::class, 'deletePost'])->name('admin.delete-post');
     Route::post('/admin/{id}/toggle-visibility', [PostController::class, 'toggleVisibility'])->name('admin.toggle-visibility');
 
+    Route::get('/admin/categories', [PostController::class, 'categories'])->name('admin.categories');
+    Route::get('/admin/categories/create', [PostController::class, 'createCategory'])->name('admin.create-category');
+    Route::post('/admin/categories/store', [PostController::class, 'storeCategory'])->name('admin.store-category');
+    Route::get('/admin/categories/update/{id}', [PostController::class, 'updateCategory'])->name('admin.update-category');
+    Route::post('/admin/categories/update', [PostController::class, 'updateCategoryAction'])->name('admin.update-category-action');
+    Route::delete('/admin/categories/delete/{id}', [PostController::class, 'deleteCategory'])->name('admin.delete-category');
+
     /** USER RELATED ROUTES */
     Route::get('/admin/users', [UserController::class, 'users'])->name('admin.users');
     Route::get('/admin/logout', [AuthController::class, 'logout'])->name('admin.logout');

@@ -131,6 +131,32 @@ class PostController extends Controller
         ]);
     }
 
+    public function categories(): View|Factory|Application
+    {
+        $categories = Category::all();
+        return view('admin.categories', compact('categories'));
+    }
+
+    public function createCategory(): Factory|Application|View
+    {
+        return \view('admin.create-category');
+    }
+
+    public function storeCategory(Request $request): RedirectResponse
+    {
+        dd($request->all());
+    }
+
+    public function deleteCategory(Request $request): JsonResponse
+    {
+        try {
+            Category::destroy($request->id);
+            return response()->json(['success' => true, 'message' => 'Category deleted successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete this category.'], 500);
+        }
+    }
+
     private function normalizeData(array $data): array
     {
         return [
