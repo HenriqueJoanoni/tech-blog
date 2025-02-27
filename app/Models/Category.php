@@ -11,7 +11,7 @@ class Category extends Model
     use HasFactory;
     public $timestamps = false;
 
-    protected $fillable = ['category_title'];
+    protected $fillable = ['category_name', 'category_slug', 'icon', 'is_available'];
 
     public function posts(): HasMany
     {

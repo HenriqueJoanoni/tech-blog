@@ -175,7 +175,6 @@ function deletePost() {
     });
 }
 
-// TODO: UPDATE THIS FUNCTION LATER
 function deleteCategory() {
     document.querySelectorAll('.delete-category-btn').forEach(button => {
         button.addEventListener('click', function (event) {
@@ -261,9 +260,8 @@ function handleCategoryIconUpload(event) {
     reader.readAsDataURL(file);
 }
 
-function generateSlug(useField) {
+function generateSlug() {
     const categoryName = document.getElementById('category-name').value;
-    const slugField = document.getElementById('slug').value;
 
     const slug = categoryName
         .toLowerCase()
@@ -273,17 +271,6 @@ function generateSlug(useField) {
         .trim();
 
     document.getElementById('slug').value = slug;
-}
-
-function createCustomSlug() {
-    let slugField = document.querySelector('#slug');
-    let checkbox = document.querySelector('#custom-slug');
-
-    if (checkbox.checked) {
-        slugField.removeAttribute('readonly');
-    } else {
-        slugField.setAttribute('readonly', 'readonly');
-    }
 }
 
 /** USER RELATED */

@@ -31,7 +31,11 @@
                                 <td><?= $category->category_name ?></td>
                                 <td><?= $category->category_slug ?></td>
                                 <td>
-                                    <img src="{{ asset($category->icon) }}" alt="{{ $category->category_name }}">
+                                    <div class="d-inline-block" style="width: 32px; height: 32px;">
+                                        <img src="{{ Vite::asset($category->icon) }}"
+                                             alt="{{ $category->category_name }}"
+                                             class="w-100 h-100 object-fit-contain">
+                                    </div>
                                 </td>
                                 <td>
                                     <a href="{{ route('admin.update-category', ['id' => $category->id]) }}" class="btn btn-primary" title="Edit category">

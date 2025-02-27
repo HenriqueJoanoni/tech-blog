@@ -11,6 +11,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class PostController extends Controller
@@ -144,7 +145,63 @@ class PostController extends Controller
 
     public function storeCategory(Request $request): RedirectResponse
     {
-        dd($request->all());
+        try {
+            $request->validate([
+                'category_name' => 'required|string|max:255',
+                'slug' => 'required|string|max:255|unique:categories,category_slug',
+                'category_icon' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'is_available' => 'required|integer',
+            ]);
+
+            // TODO: ALTER THE DESTINATION PATH
+            $imagePath = null;
+            if ($request->hasFile('category_icon')) {
+                $imageName = time() . '.' . $request->category_icon->getClientOriginalExtension();
+                $request->category_icon->move('resources/img/categories/', $imageName);
+                $imagePath = 'resources/img/categories/' . $imageName;
+            }
+
+            Category::create([
+                'category_name' => $request->category_name,
+                'category_slug' => $request->slug,
+                'icon' => $imagePath,
+                'is_available' => $request->is_available
+            ]);
+
+            return redirect()->route('admin.categories')->with('success', 'Category created successfully');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to create category')->withInput();
+        }
+    }
+
+    public function updateCategory($id): View|Factory|Application
+    {
+        $category = Category::where('id', $id)->first();
+
+        return view('admin.category-update', compact('category'));
+    }
+
+    public function updateCategoryAction(Request $request): RedirectResponse
+    {
+        $category = Category::findOrFail($request->id);
+
+        $data = $request->validate([
+            'category_name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255',
+            'category_icon' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'is_available' => 'required|integer',
+        ]);
+
+        if ($request->hasFile('category_icon')) {
+            if ($category->icon && Storage::disk('public')->exists($category->icon)) {
+                Storage::disk('public')->delete($category->icon);
+            }
+            $data['icon'] = $request->file('category_icon')->store('icons', 'public');
+        }
+
+        $category->update($data);
+
+        return redirect()->route('admin.categories')->with('success', 'Category updated successfully.');
     }
 
     public function deleteCategory(Request $request): JsonResponse
