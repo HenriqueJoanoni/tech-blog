@@ -175,10 +175,103 @@ function deletePost() {
     });
 }
 
+function deleteCategory() {
+    document.querySelectorAll('.delete-category-btn').forEach(button => {
+        button.addEventListener('click', function (event) {
+            const itemId = this.getAttribute('data-category-id');
+            const itemName = this.getAttribute('data-category-name');
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            if (!csrfToken) {
+                console.error('CSRF token not found');
+                return;
+            }
+
+            Swal.fire({
+                title: "Delete: " + itemName + " ?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#007bff",
+                cancelButtonColor: "#dc3545",
+                confirmButtonText: "Delete anyway"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/categories/delete/${itemId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    title: "Deleted!",
+                                    text: "Category " + itemName + " has been deleted.",
+                                    icon: "success"
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: data.message || 'Failed to delete this category.',
+                                    icon: 'error',
+                                    confirmButtonText: 'OK'
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'Error deleting this category',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+                        });
+                }
+            });
+        });
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     deletePost();
     deleteUser();
+    deleteCategory();
 });
+
+function handleCategoryIconUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    const preview = document.getElementById('imagePreview');
+
+    reader.onload = function(e) {
+        preview.style.backgroundImage = `url(${e.target.result})`;
+        preview.style.display = 'none';
+        preview.offsetHeight;
+        preview.style.display = 'block';
+    }
+    reader.readAsDataURL(file);
+}
+
+function generateSlug() {
+    const categoryName = document.getElementById('category-name').value;
+
+    const slug = categoryName
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim();
+
+    document.getElementById('slug').value = slug;
+}
 
 /** USER RELATED */
 function handleAvatarUpload(event) {

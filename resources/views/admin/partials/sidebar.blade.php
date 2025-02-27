@@ -31,14 +31,14 @@
                             <p>Manage Users</p>
                         </a>
                     </li>
-                @endif
-                <li class="nav-item">
-                    <a href="{{ route('admin.posts-management') }}" class="nav-link">
-                        <i class="nav-icon fas fa-book"></i>
-                        <p>Manage Posts</p>
-                    </a>
-                </li>
-                @if(auth()->user()->permission_id == config('app.admin_access'))
+
+                    <li class="nav-item">
+                        <a href="{{ route('admin.categories') }}" class="nav-link">
+                            <i class="nav-icon fa-solid fa-list"></i>
+                            <p>Manage Categories</p>
+                        </a>
+                    </li>
+
                     <li class="nav-item">
                         <a href="#" class="nav-link">
                             <i class="nav-icon fas fa-cog"></i>
@@ -46,6 +46,14 @@
                         </a>
                     </li>
                 @endif
+
+                <li class="nav-item">
+                    <a href="{{ route('admin.posts-management') }}" class="nav-link">
+                        <i class="nav-icon fas fa-book"></i>
+                        <p>Manage Posts</p>
+                    </a>
+                </li>
+
                 <li class="nav-item">
                     <a href="{{ route('admin.logout') }}" class="nav-link">
                         <i class="nav-icon fas fa-door-open"></i>
