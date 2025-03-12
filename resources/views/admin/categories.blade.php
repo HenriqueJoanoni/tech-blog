@@ -25,6 +25,7 @@
                         </tr>
                         </thead>
                         <tbody>
+                        {{--                        {{ dd($categories) }}--}}
                         @foreach($categories as $category)
                             <tr>
                                 <th scope="row"><?= $category->id ?></th>
@@ -32,16 +33,20 @@
                                 <td><?= $category->category_slug ?></td>
                                 <td>
                                     <div class="d-inline-block" style="width: 32px; height: 32px;">
-                                        <img src="{{ Vite::asset($category->icon) }}"
-                                             alt="{{ $category->category_name }}"
-                                             class="w-100 h-100 object-fit-contain">
+                                        <img
+                                            src="{{ ($category->icon) ? asset('storage/'.$category->icon) : asset('category-default/no-photo.png') }}"
+                                            alt="{{ $category->category_name }}"
+                                            class="w-100 h-100 object-fit-contain">
                                     </div>
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.update-category', ['id' => $category->id]) }}" class="btn btn-primary" title="Edit category">
+                                    <a href="{{ route('admin.update-category', ['id' => $category->id]) }}"
+                                       class="btn btn-primary" title="Edit category">
                                         <i class="fa fa-pencil"></i>
                                     </a>
-                                    <button class="btn btn-danger delete-category-btn" data-category-id="{{ $category->id }}" data-category-name="{{ $category->category_name }}">
+                                    <button class="btn btn-danger delete-category-btn"
+                                            data-category-id="{{ $category->id }}"
+                                            data-category-name="{{ $category->category_name }}">
                                         <i class="fa fa-trash"></i>
                                     </button>
                                 </td>

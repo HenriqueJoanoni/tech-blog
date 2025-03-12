@@ -153,12 +153,8 @@ class PostController extends Controller
                 'is_available' => 'required|integer',
             ]);
 
-            // TODO: ALTER THE DESTINATION PATH
-            $imagePath = null;
             if ($request->hasFile('category_icon')) {
-                $imageName = time() . '.' . $request->category_icon->getClientOriginalExtension();
-                $request->category_icon->move('resources/img/categories/', $imageName);
-                $imagePath = 'resources/img/categories/' . $imageName;
+                $imagePath = $request->file('category_icon')->store('category-icons', 'public');
             }
 
             Category::create([
@@ -207,6 +203,11 @@ class PostController extends Controller
     public function deleteCategory(Request $request): JsonResponse
     {
         try {
+            $category = Category::findOrFail($request->id);
+            if ($category->icon && Storage::disk('public')->exists($category->icon)) {
+                Storage::disk('public')->delete($category->icon);
+            }
+
             Category::destroy($request->id);
             return response()->json(['success' => true, 'message' => 'Category deleted successfully.']);
         } catch (\Exception $e) {
