@@ -24,7 +24,7 @@ class PostController extends Controller
     public function managePosts():Factory|Application|View
     {
         if (strtolower(auth()->user()->name) == 'admin') {
-            $posts = Post::paginate(10);
+            $posts = Post::with(['category', 'user'])->paginate(10);
         } else {
             $posts = Post::where('author', auth()->id())->get();
         }

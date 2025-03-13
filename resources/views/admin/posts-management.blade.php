@@ -36,7 +36,7 @@
                                 <td><?= GeneralHandler::str_limit_words($post->excerpt, 4) ?></td>
                                 <td><?= $post->views ?? 0 ?></td>
                                 <td><?= $post->category->category_name ?></td>
-                                <td><?= $post->author ?></td>
+                                <td><?= $post->user->name ?></td>
                                 <td><?= GeneralHandler::dateFmt($post->created_at, 'd/m/Y') ?></td>
                                 <td><?= GeneralHandler::dateFmt($post->updated_at, 'd/m/Y') ?></td>
                                 <td>
