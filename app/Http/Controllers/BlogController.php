@@ -70,7 +70,7 @@ class BlogController extends Controller
      */
     public function show(string $slug, int $id): View|Factory|Application
     {
-        $postData = Post::where('id', $id)->first();
+        $postData = Post::with(['user'])->where('id', $id)->first();
 
         return view('blog-content.show-post', [
             'postData' => $postData,

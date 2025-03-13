@@ -68,17 +68,19 @@
             <h2 class="text-2xl font-bold mb-4">Latest in Software Development</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 @foreach ($softwareDevPosts as $post)
-                    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-                        <img src="{{ asset('storage/'.$post->image) }}" alt="{{ $post->title }}"
-                             class="w-full h-40 object-cover">
-                        <div class="p-4">
-                            <h3 class="text-lg font-semibold">{{ $post->title }}</h3>
-                            <p class="text-sm text-gray-600">By {{ $post->user->name }}
-                                - {{ $post->created_at->format('d M, Y') }}</p>
-                            <p class="text-sm text-gray-600">
-                                Category: {{ $post->category->category_name ?? 'Uncategorized' }}</p>
+                    <a href="{{ route('blog.post', [$post->slug, $post->id]) }}">
+                        <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                            <img src="{{ asset('storage/'.$post->image) }}" alt="{{ $post->title }}"
+                                 class="w-full h-40 object-cover">
+                            <div class="p-4">
+                                <h3 class="text-lg font-semibold">{{ $post->title }}</h3>
+                                <p class="text-sm text-gray-600">By {{ $post->user->name }}
+                                    - {{ $post->created_at->format('d M, Y') }}</p>
+                                <p class="text-sm text-gray-600">
+                                    Category: {{ $post->category->category_name ?? 'Uncategorized' }}</p>
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 @endforeach
             </div>
         </section>
