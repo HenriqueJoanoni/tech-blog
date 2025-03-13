@@ -24,7 +24,7 @@
                     <div class="bg-white shadow-lg rounded-lg p-6 hover:shadow-xl transition">
                         <!-- Center the icon using Flexbox -->
                         <div class="flex justify-center items-center text-4xl">
-                            <img src="{{ Vite::asset($category->icon) }}" alt="{{ $category->category_name }}"
+                            <img src="{{ asset('storage/'.$category->icon) }}" alt="{{ $category->category_name }}"
                                  class="w-12 h-12">
                         </div>
                         <h3 class="text-xl font-semibold text-gray-800 mt-4">{{ $category->category_name }}</h3>

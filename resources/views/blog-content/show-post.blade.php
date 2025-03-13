@@ -6,7 +6,7 @@
     <section class="relative w-full min-h-screen flex flex-col">
         <!-- Banner Image -->
         <div class="w-full">
-            <img src="{{ asset($postData->image) }}" alt="{{ $postData->title }}"
+            <img src="{{ asset('storage/'.$postData->image) }}" alt="{{ $postData->title }}"
                  class="w-full h-64 object-cover">
         </div>
 

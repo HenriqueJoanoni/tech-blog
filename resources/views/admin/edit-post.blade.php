@@ -32,8 +32,8 @@
                             <!-- Content Field -->
                             <div class="form-group mb-3">
                                 <label for="postContent">Content</label>
-                                <textarea name="content" id="postContent" class="form-control"
-                                          rows="10">{{ old('content', trim($post[0]->content)) }}</textarea>
+                                <textarea name="postContent" id="postContent" class="form-control"
+                                          rows="10">{{ old('postContent', trim($post[0]->content)) }}</textarea>
                             </div>
 
                             <!-- Cover Upload Field -->
