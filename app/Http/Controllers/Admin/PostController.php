@@ -16,12 +16,7 @@ use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
-    public function dashboard(): View|Factory|Application
-    {
-        return view('admin.dashboard');
-    }
-
-    public function managePosts():Factory|Application|View
+    public function managePosts(): Factory|Application|View
     {
         if (strtolower(auth()->user()->name) == 'admin') {
             $posts = Post::with(['category', 'user'])->paginate(10);
