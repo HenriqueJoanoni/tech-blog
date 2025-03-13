@@ -51,11 +51,8 @@ class PostController extends Controller
             'cover' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $imagePath = null;
         if ($request->hasFile('cover')) {
-            $imageName = time() . '.' . $request->cover->getClientOriginalExtension();
-            $request->cover->move(public_path('img'), $imageName);
-            $imagePath = 'img/' . $imageName;
+            $imagePath = $request->file('cover')->store('post-cover', 'public');
         }
 
         Post::create([
@@ -84,39 +81,61 @@ class PostController extends Controller
 
     public function updatePost(Request $request): RedirectResponse
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'excerpt' => 'required|string|max:255',
-            'content' => 'required|string',
-            'category_id' => 'required|exists:categories,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
+        try {
+            $request->validate([
+                'title' => 'required|string|max:255',
+                'excerpt' => 'required|string|max:255',
+                'postContent' => 'required|string',
+                'category_id' => 'required|exists:categories,id',
+                'cover' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5048',
+            ]);
 
-        $normalizedData = $this->normalizeData($request->all());
+            $post = Post::find($request->id);
 
-        if ($request->hasFile('cover')) {
-            $imagePath = $this->storeImage($request);
-            $normalizedData['image'] = $imagePath;
+            if (!$post) {
+                return redirect()->back()->withErrors("Post not found")->withInput();
+            }
+
+            $normalizedData = [
+                'title' => $request->title,
+                'slug' => Str::slug($request->title),
+                'excerpt' => $request->excerpt,
+                'content' => $request->postContent,
+                'category_id' => $request->category_id,
+            ];
+
+            if ($request->hasFile('cover')) {
+                if ($post->image) {
+                    Storage::disk('public')->delete($post->image);
+                }
+
+                $imagePath = $request->file('cover')->store('post-cover', 'public');
+                $normalizedData['image'] = $imagePath;
+            }
+
+            $post->update($normalizedData);
+
+            return redirect()->route('admin.posts-management')->with('success', 'Post updated successfully');
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to update post: ' . $e->getMessage())
+                ->withInput();
         }
-
-        $post = Post::find($request->id);
-
-        if (!$post) {
-            return redirect()->back()->withErrors("Post not found")->withInput();
-        }
-
-        $post->update($normalizedData);
-
-        return redirect()->route('admin.posts-management')->with('success', 'Post updated successfully');
     }
 
     public function deletePost(Request $request): JsonResponse
     {
         try {
+            $postImage = Post::findOrFail($request->id);
+            if ($postImage->image && Storage::disk('public')->exists($postImage->image)) {
+                Storage::disk('public')->delete($postImage->image);
+            }
+
             Post::destroy($request->id);
             return response()->json(['success' => true, 'message' => 'Post deleted successfully.']);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Failed to delete this post.'], 500);
+            return response()->json(['error ' => false, 'message' => 'Failed to delete this post.'], 500);
         }
     }
 
@@ -224,12 +243,5 @@ class PostController extends Controller
             'content' => htmlspecialchars($data['content']),
             'category_id' => $data['category_id'],
         ];
-    }
-
-    private function storeImage(Request $request): string
-    {
-        $imageName = time() . '.' . $request->cover->getClientOriginalExtension();
-        $request->cover->move(public_path('img'), $imageName);
-        return 'img/' . $imageName;
     }
 }
