@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\UserController;
@@ -48,7 +49,7 @@ Route::middleware(['auth', 'checkPerm:' . config('editor_access')])->group(funct
 /** ADMIN ROUTES */
 Route::middleware(['auth', 'checkPerm:' . config('admin_access')])->group(function () {
     /** ADMIN HOMEPAGE */
-    Route::get('/admin', [PostController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/admin', [DashboardController::class, 'dashboard'])->name('admin.dashboard');
 
     /** POSTS RELATED ROUTES */
     Route::get('/admin/posts-management', [PostController::class, 'managePosts'])->name('admin.posts-management');
