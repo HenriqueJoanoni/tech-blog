@@ -15,7 +15,7 @@
                             <a href="{{ route('blog.post', ['slug' => $post->slug, 'id' => $post->id]) }}">
                                 <div class="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-end p-8">
                                     <h2 class="text-white text-3xl font-bold">{{ $post->title }}</h2>
-                                    <p class="text-gray-300 text-sm">By {{ $post->author }}
+                                    <p class="text-gray-300 text-sm">By {{ $post->user->name }}
                                         - {{ $post->created_at->format('d M, Y') }}</p>
                                     <p class="text-gray-300 text-sm">
                                         Category: {{ $post->category->category_name ?? 'Uncategorized' }}</p>
@@ -52,7 +52,7 @@
                                  class="w-full h-48 object-cover">
                             <div class="p-4">
                                 <h3 class="text-lg font-semibold">{{ $post->title }}</h3>
-                                <p class="text-sm text-gray-600">By {{ $post->author }}
+                                <p class="text-sm text-gray-600">By {{ $post->user->name }}
                                     - {{ $post->created_at->format('d M, Y') }}</p>
                                 <p class="text-sm text-gray-600">
                                     Category: {{ $post->category->category_name ?? 'Uncategorized' }}</p>
@@ -73,7 +73,7 @@
                              class="w-full h-40 object-cover">
                         <div class="p-4">
                             <h3 class="text-lg font-semibold">{{ $post->title }}</h3>
-                            <p class="text-sm text-gray-600">By {{ $post->author }}
+                            <p class="text-sm text-gray-600">By {{ $post->user->name }}
                                 - {{ $post->created_at->format('d M, Y') }}</p>
                             <p class="text-sm text-gray-600">
                                 Category: {{ $post->category->category_name ?? 'Uncategorized' }}</p>

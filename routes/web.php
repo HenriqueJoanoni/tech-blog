@@ -31,7 +31,7 @@ Route::get('logout', [AuthController::class, 'logout'])->name('logout');
 /** EDITOR ROUTES */
 Route::middleware(['auth', 'checkPerm:' . config('editor_access')])->group(function () {
     /** ADMIN HOMEPAGE */
-    Route::get('/admin', [PostController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/admin', [DashboardController::class, 'dashboard'])->name('admin.dashboard');
 
     /** POSTS RELATED ROUTES */
     Route::get('/admin/posts-management', [PostController::class, 'managePosts'])->name('admin.posts-management');

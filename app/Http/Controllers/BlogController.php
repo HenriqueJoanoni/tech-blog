@@ -7,7 +7,6 @@ use App\Models\Post;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
-use Illuminate\Http\Request;
 
 class BlogController extends Controller
 {
@@ -16,10 +15,10 @@ class BlogController extends Controller
      */
     public function home(): View|Factory|Application
     {
-        $latestPosts = Post::where('is_visible', 1)->latest()->take(5)->get();
-        $trendingPosts = Post::where('is_visible', 1)->orderBy('views', 'desc')->take(4)->get();
+        $latestPosts = Post::with(['user'])->where('is_visible', 1)->latest()->take(5)->get();
+        $trendingPosts = Post::with(['user'])->where('is_visible', 1)->orderBy('views', 'desc')->take(4)->get();
         $softwareDevCategory = Category::where('category_name', 'Software Development')->first();
-        $softwareDevPosts = Post::where([
+        $softwareDevPosts = Post::with(['user'])->where([
             ['category_id', $softwareDevCategory->id],
             ['is_visible', 1]
         ])
