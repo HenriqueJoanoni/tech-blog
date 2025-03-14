@@ -129,5 +129,5 @@ return [
     'admin_access' => env('ACCESS_ADMIN', 1),
     'editor_access' => env('ACCESS_EDITOR', 2),
     'viewer_access' => env('ACCESS_VIEWER', 3),
-
+    'tinyMCE_api_key' => env('TINYMCE_API_KEY'),
 ];

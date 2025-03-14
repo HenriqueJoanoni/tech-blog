@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.admin', ['tinymce' => true])
 
 @section('page_title', 'Posts Insert')
 
@@ -32,8 +32,19 @@
                             <!-- Content Field -->
                             <div class="form-group mb-3">
                                 <label for="postContent">Content</label>
-                                <textarea name="postContent" id="postContent" class="form-control"
-                                          rows="10">{{ old('postContent') }}</textarea>
+                                <x-forms.tinymce-editor
+                                    id="postContent"
+                                    name="postContent"
+                                    class="form-control"
+                                    content="{{ old('postContent') }}"
+                                    :plugins="['autoresize', 'link', 'image', 'code', 'table']"
+                                    toolbar="undo redo | blocks | bold italic | alignleft aligncenter alignright | indent outdent | bullist numlist | code | table"
+                                    options="
+                                        height: 800,
+                                        menubar: 'file edit view',
+                                        content_style: 'body { font-family: sans-serif; }'
+                                    "
+                                />
                             </div>
 
                             <!-- Cover Upload Field -->
