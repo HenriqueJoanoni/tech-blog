@@ -65,7 +65,19 @@
                             <!-- Bio Field -->
                             <div class="form-group mb-3">
                                 <label for="bio">Bio</label>
-                                <textarea name="bio" id="bio" class="form-control" rows="10">{{ old('bio') }}</textarea>
+                                <x-forms.tinymce-editor
+                                    id="bio"
+                                    name="bio"
+                                    class="form-control"
+                                    content="{!! old('bio') !!}"
+                                    :plugins="['autoresize', 'link', 'image', 'code', 'table']"
+                                    toolbar="undo redo | blocks | bold italic | alignleft aligncenter alignright | indent outdent | bullist numlist | code | table"
+                                    options="
+                                        height: 800,
+                                        menubar: 'file edit view',
+                                        content_style: 'body { font-family: sans-serif; }'
+                                    "
+                                />
                             </div>
 
                             <!-- Permission Field -->

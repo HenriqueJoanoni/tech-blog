@@ -72,9 +72,20 @@
                                         </div>
 
                                         <div class="col-12">
-                                            <label class="form-label">Bio</label>
-                                            <textarea name="bio" class="form-control" rows="3"
-                                                      placeholder="Tell us about yourself...">{{ old('bio', $user->bio) }}</textarea>
+                                            <label for="bio">Bio</label>
+                                            <x-forms.tinymce-editor
+                                                id="bio"
+                                                name="bio"
+                                                class="form-control"
+                                                content="{!! old('bio', auth()->user()->bio) !!}"
+                                                :plugins="['autoresize', 'link', 'image', 'code', 'table']"
+                                                toolbar="undo redo | blocks | bold italic | alignleft aligncenter alignright | indent outdent | bullist numlist | code | table"
+                                                options="
+                                                    height: 800,
+                                                    menubar: 'file edit view',
+                                                    content_style: 'body { font-family: sans-serif; }'
+                                                "
+                                            />
                                         </div>
 
                                         <div class="col-12 border-top mt-4 pt-4">

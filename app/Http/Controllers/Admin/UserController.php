@@ -6,6 +6,8 @@ use App\Helpers\GeneralHandler;
 use App\Http\Controllers\Controller;
 use App\Models\Permission;
 use App\Models\User;
+use App\Services\HtmlPurifier;
+use App\Services\HtmlPurifierService;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
@@ -201,10 +203,11 @@ class UserController extends Controller
 
     private function normalizeData(array $data): array
     {
+        $purifier = HtmlPurifierService::getInstance();
         $normalized = [
-            'name' => htmlspecialchars($data['name']),
+            'name' => htmlspecialchars($data['name'], ENT_QUOTES, 'UTF-8'),
             'email' => filter_var($data['email'], FILTER_SANITIZE_EMAIL),
-            'bio' => htmlspecialchars($data['bio'])
+            'bio' => $purifier->purify($data['bio']),
         ];
 
         if (isset($data['permission_id'])) {

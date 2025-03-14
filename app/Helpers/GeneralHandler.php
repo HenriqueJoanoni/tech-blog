@@ -94,4 +94,15 @@ class GeneralHandler
         $chars = mb_substr($string, 0, mb_strrpos(mb_substr($string, 0, $limit), " "));
         return "{$chars}{$pointer}";
     }
+
+    /**
+     * @param string $html
+     * @param int $limitWords
+     * @return string
+     */
+    public static function getBioPreview(string $html, int $limitWords = 4): string
+    {
+        $clean = html_entity_decode(strip_tags($html));
+        return self::str_limit_words($clean, $limitWords);
+    }
 }
