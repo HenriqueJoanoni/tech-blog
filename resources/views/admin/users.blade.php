@@ -34,11 +34,11 @@
                                 <td><?= $user->email ?></td>
                                 <td>
                                     @if($user->bio)
-                                        {{ GeneralHandler::str_limit_words($user->bio, 4) }}
+                                        {{ GeneralHandler::getBioPreview($user->bio) }}
                                         <a href="#"
                                            data-bs-toggle="modal"
                                            data-bs-target="#user-bio-modal"
-                                           data-bio="{{ $user->bio }}"
+                                           data-bio="{!! strip_tags($user->bio) !!}"
                                            data-user-name="{{ $user->name }}"> see more
                                         </a>
                                     @else

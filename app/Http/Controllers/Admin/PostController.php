@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\GeneralHandler;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Post;
+use App\Services\HtmlPurifierService;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
@@ -50,15 +52,11 @@ class PostController extends Controller
             $imagePath = $request->file('cover')->store('post-cover', 'public');
         }
 
-        Post::create([
-            'title' => $request->title,
-            'slug' => Str::slug($request->title),
-            'excerpt' => $request->excerpt,
-            'content' => $request->postContent,
-            'image' => $imagePath,
-            'category_id' => $request->category_id,
-            'author' => auth()->id()
-        ]);
+        $normalized = $this->normalizeData($request->only(['title', 'excerpt', 'postContent', 'category_id']));
+        $normalized['image'] = $imagePath;
+        $normalized['author'] = auth()->id();
+
+        Post::create($normalized);
 
         return redirect()->route('admin.posts-management')->with('success', 'Post created successfully');
     }
@@ -91,13 +89,7 @@ class PostController extends Controller
                 return redirect()->back()->withErrors("Post not found")->withInput();
             }
 
-            $normalizedData = [
-                'title' => $request->title,
-                'slug' => Str::slug($request->title),
-                'excerpt' => $request->excerpt,
-                'content' => $request->postContent,
-                'category_id' => $request->category_id,
-            ];
+            $normalizedData = $this->normalizeData($request->only(['title', 'excerpt', 'postContent', 'category_id']));
 
             if ($request->hasFile('cover')) {
                 if ($post->image) {
@@ -171,12 +163,13 @@ class PostController extends Controller
                 $imagePath = $request->file('category_icon')->store('category-icons', 'public');
             }
 
-            Category::create([
-                'category_name' => $request->category_name,
-                'category_slug' => $request->slug,
-                'icon' => $imagePath,
-                'is_available' => $request->is_available
-            ]);
+            $normalized = $this->normalizeData(
+                $request->only(['category_name', 'slug', 'is_available']),
+                'category'
+            );
+            $normalized['icon'] = $imagePath;
+
+            Category::create($normalized);
 
             return redirect()->route('admin.categories')->with('success', 'Category created successfully');
         } catch (\Exception $e) {
@@ -195,21 +188,26 @@ class PostController extends Controller
     {
         $category = Category::findOrFail($request->id);
 
-        $data = $request->validate([
+        $request->validate([
             'category_name' => 'required|string|max:255',
             'slug' => 'required|string|max:255',
             'category_icon' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'is_available' => 'required|integer',
         ]);
 
+        $normalized = $this->normalizeData(
+            $request->only(['category_name', 'slug', 'category_icon', 'is_available']),
+            'category'
+        );
+
         if ($request->hasFile('category_icon')) {
             if ($category->icon && Storage::disk('public')->exists($category->icon)) {
                 Storage::disk('public')->delete($category->icon);
             }
-            $data['icon'] = $request->file('category_icon')->store('icons', 'public');
+            $normalized['icon'] = $request->file('category_icon')->store('icons', 'public');
         }
 
-        $category->update($data);
+        $category->update($normalized);
 
         return redirect()->route('admin.categories')->with('success', 'Category updated successfully.');
     }
@@ -229,14 +227,23 @@ class PostController extends Controller
         }
     }
 
-    private function normalizeData(array $data): array
+    private function normalizeData(array $data, string $normalizationType = 'post'): array
     {
+        $purifier = HtmlPurifierService::getInstance();
+        if ($normalizationType === 'category') {
+            return [
+                'category_name' => htmlspecialchars($data['category_name'], ENT_QUOTES, 'UTF-8'),
+                'category_slug' => htmlspecialchars($data['slug'], ENT_QUOTES, 'UTF-8'),
+                'is_available' => GeneralHandler::onlyNumbers($data['is_available']),
+            ];
+        }
+
         return [
-            'title' => htmlspecialchars($data['title']),
+            'title' => htmlspecialchars($data['title'], ENT_QUOTES, 'UTF-8'),
             'slug' => htmlspecialchars(Str::slug($data['title'])),
-            'excerpt' => htmlspecialchars($data['excerpt']),
-            'content' => htmlspecialchars($data['content']),
-            'category_id' => $data['category_id'],
+            'excerpt' => htmlspecialchars($data['excerpt'], ENT_QUOTES, 'UTF-8'),
+            'content' => $purifier->purify($data['postContent']),
+            'category_id' => GeneralHandler::onlyNumbers($data['category_id']),
         ];
     }
 }
