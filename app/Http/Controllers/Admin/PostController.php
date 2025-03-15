@@ -232,18 +232,18 @@ class PostController extends Controller
         $purifier = HtmlPurifierService::getInstance();
         if ($normalizationType === 'category') {
             return [
-                'category_name' => htmlspecialchars($data['category_name'], ENT_QUOTES, 'UTF-8'),
-                'category_slug' => htmlspecialchars($data['slug'], ENT_QUOTES, 'UTF-8'),
-                'is_available' => GeneralHandler::onlyNumbers($data['is_available']),
+                'category_name' => strip_tags($data['category_name']),
+                'category_slug' => Str::slug(strip_tags($data['slug'])),
+                'is_available' => (int) $data['is_available'],
             ];
         }
 
         return [
-            'title' => htmlspecialchars($data['title'], ENT_QUOTES, 'UTF-8'),
-            'slug' => htmlspecialchars(Str::slug($data['title'])),
-            'excerpt' => htmlspecialchars($data['excerpt'], ENT_QUOTES, 'UTF-8'),
+            'title' => strip_tags($data['title']),
+            'slug' => Str::slug(strip_tags($data['title'])),
+            'excerpt' => strip_tags($data['excerpt']),
             'content' => $purifier->purify($data['postContent']),
-            'category_id' => GeneralHandler::onlyNumbers($data['category_id']),
+            'category_id' => (int) $data['category_id'],
         ];
     }
 }

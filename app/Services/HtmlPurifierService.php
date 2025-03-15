@@ -17,6 +17,8 @@ class HtmlPurifierService
             $config->set('Core.LexerImpl', 'DirectLex');
             $config->set('Cache.DefinitionImpl', null);
             $config->set('HTML.Allowed', 'p,br,b,strong,i,em,a[href|title]');
+            $config->set('AutoFormat.AutoParagraph', true);
+            $config->set('Core.EscapeInvalidTags', false);
 
             self::$instance = new HTMLPurifier($config);
         }
