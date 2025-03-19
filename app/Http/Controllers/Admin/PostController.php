@@ -15,6 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class PostController extends Controller
 {
@@ -38,27 +39,45 @@ class PostController extends Controller
         ]);
     }
 
-    public function storePost(Request $request): RedirectResponse
+    public function storePost(Request $request): JsonResponse
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'excerpt' => 'required|string|max:255',
-            'postContent' => 'required|string',
-            'category_id' => 'required|exists:categories,id',
-            'cover' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
+        try {
+            $request->validate([
+                'title' => 'required|string|max:255',
+                'excerpt' => 'required|string|max:255',
+                'postContent' => 'required|string',
+                'category_id' => 'required|exists:categories,id',
+                'cover' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            ]);
 
-        if ($request->hasFile('cover')) {
-            $imagePath = $request->file('cover')->store('post-cover', 'public');
+            if ($request->hasFile('cover')) {
+                $imagePath = $request->file('cover')->store('post-cover', 'public');
+            }
+
+            $normalized = $this->normalizeData($request->only(['title', 'excerpt', 'postContent', 'category_id']));
+            $normalized['image'] = $imagePath;
+            $normalized['author'] = auth()->id();
+
+            Post::create($normalized);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Post created successfully',
+                'redirect' => route('admin.posts-management')
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
         }
-
-        $normalized = $this->normalizeData($request->only(['title', 'excerpt', 'postContent', 'category_id']));
-        $normalized['image'] = $imagePath;
-        $normalized['author'] = auth()->id();
-
-        Post::create($normalized);
-
-        return redirect()->route('admin.posts-management')->with('success', 'Post created successfully');
     }
 
     public function editPost(Request $request): View|Factory|Application
@@ -72,7 +91,7 @@ class PostController extends Controller
         ]);
     }
 
-    public function updatePost(Request $request): RedirectResponse
+    public function updatePost(Request $request): JsonResponse|RedirectResponse
     {
         try {
             $request->validate([
@@ -102,9 +121,24 @@ class PostController extends Controller
 
             $post->update($normalizedData);
 
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Post updated successfully',
+                    'redirect' => route('admin.posts-management')
+                ]);
+            }
+
             return redirect()->route('admin.posts-management')->with('success', 'Post updated successfully');
 
         } catch (\Exception $e) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update post: ' . $e->getMessage()
+                ], 500);
+            }
+
             return redirect()->back()
                 ->with('error', 'Failed to update post: ' . $e->getMessage())
                 ->withInput();

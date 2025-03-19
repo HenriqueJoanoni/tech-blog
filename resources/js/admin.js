@@ -361,3 +361,304 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+/******************************************
+ *              FORMS VALIDATION          *
+ *****************************************/
+
+/** STORE POST VALIDATION */
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('#storePost');
+    let tinyMCEInitialized = false;
+
+    const initTinyMCEValidation = () => {
+        if (typeof tinymce !== 'undefined' && tinymce.get('postContent')) {
+            tinyMCEInitialized = true;
+            tinymce.get('postContent').on('change', () => validateField('postContent', 'contentError'));
+        }
+    };
+
+    const observer = new MutationObserver(initTinyMCEValidation);
+    observer.observe(document.body, {childList: true, subtree: true});
+
+    const validateField = (fieldId, errorId) => {
+        const field = document.getElementById(fieldId);
+        const errorElement = document.getElementById(errorId);
+        let isValid = true;
+
+        if (!field) return true;
+
+        if (fieldId === 'postContent' && tinyMCEInitialized) {
+            isValid = tinymce.get(fieldId).getContent().trim().length > 0;
+        } else if (field.type === 'file') {
+            isValid = field.files.length > 0;
+        } else if (field.tagName === 'SELECT') {
+            isValid = field.value !== '';
+        } else {
+            isValid = field.value.trim() !== '';
+        }
+
+        if (!isValid) {
+            field.classList.add('is-invalid');
+            if (!errorElement) {
+                const error = document.createElement('div');
+                error.className = 'text-danger mt-1';
+                error.id = errorId;
+                error.textContent = 'This field is required';
+                field.closest('.form-group').appendChild(error);
+            }
+        } else {
+            field.classList.remove('is-invalid');
+            if (errorElement) errorElement.remove();
+        }
+
+        return isValid;
+    };
+
+    const fields = [
+        {id: 'postTitle', errorId: 'titleError'},
+        {id: 'postExcerpt', errorId: 'excerptError'},
+        {id: 'postCategory', errorId: 'categoryError'},
+        {id: 'postCover', errorId: 'coverError'}
+    ];
+
+    fields.forEach(({id, errorId}) => {
+        const field = document.getElementById(id);
+        if (field) {
+            field.addEventListener('input', () => validateField(id, errorId));
+            field.addEventListener('change', () => validateField(id, errorId));
+        }
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        let isValid = true;
+
+        fields.forEach(({id, errorId}) => {
+            if (!validateField(id, errorId)) isValid = false;
+        });
+
+        if (tinyMCEInitialized && !validateField('postContent', 'contentError')) {
+            isValid = false;
+        }
+
+        if (!isValid) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: 'Please fill all required fields correctly',
+                didOpen: () => {
+                    const firstInvalid = document.querySelector('.is-invalid');
+                    if (firstInvalid) firstInvalid.scrollIntoView({behavior: 'smooth'});
+                }
+            });
+            return;
+        }
+
+        const submitButton = form.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
+
+        try {
+            if (tinyMCEInitialized) tinymce.triggerSave();
+            const formData = new FormData(form);
+
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Submission failed');
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: data.message,
+                willClose: () => {
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    }
+                }
+            });
+
+            form.reset();
+            if (tinyMCEInitialized) tinymce.get('postContent').setContent('');
+
+        } catch (error) {
+            console.error('Submission error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: error.message
+            });
+        } finally {
+            submitButton.disabled = false;
+            submitButton.innerHTML = 'Create Post';
+        }
+    });
+});
+
+/** UPDATE POST VALIDATION */
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form[action="{{ route(\'admin.update-post\') }}"]');
+    let tinyMCEInitialized = false;
+
+    const initTinyMCEValidation = () => {
+        if (typeof tinymce !== 'undefined' && tinymce.get('postContent')) {
+            tinyMCEInitialized = true;
+            tinymce.get('postContent').on('change', () => validateField('postContent', 'contentError'));
+        }
+    };
+
+    const observer = new MutationObserver(initTinyMCEValidation);
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    const validateField = (fieldId, errorId) => {
+        const field = document.getElementById(fieldId);
+        const errorElement = document.getElementById(errorId);
+        let isValid = true;
+
+        if (!field) return true;
+
+        if (fieldId === 'postContent' && tinyMCEInitialized) {
+            const content = tinymce.get(fieldId).getContent().trim();
+            isValid = content.length > 0;
+        } else if (field.type === 'file') {
+            isValid = field.files.length > 0;
+        } else if (field.tagName === 'SELECT') {
+            isValid = field.value !== '';
+        } else {
+            isValid = field.value.trim() !== '';
+        }
+
+        if (!isValid) {
+            if (!errorElement) {
+                const error = document.createElement('div');
+                error.className = 'text-danger mt-1';
+                error.id = errorId;
+                error.textContent = 'This field is required';
+                field.closest('.form-group').appendChild(error);
+            }
+            field.classList.add('is-invalid');
+        } else {
+            if (errorElement) errorElement.remove();
+            field.classList.remove('is-invalid');
+        }
+
+        return isValid;
+    };
+
+    const fields = [
+        { id: 'postTitle', errorId: 'titleError' },
+        { id: 'postExcerpt', errorId: 'excerptError' },
+        { id: 'postCategory', errorId: 'categoryError' },
+    ];
+
+    const validateFile = () => {
+        const fileInput = document.getElementById('postCover');
+        const errorElement = document.getElementById('coverError');
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/svg+xml'];
+            const isValid = validTypes.includes(file.type) && file.size <= 5048 * 1024;
+
+            if (!isValid) {
+                if (!errorElement) {
+                    const error = document.createElement('div');
+                    error.className = 'text-danger mt-1';
+                    error.id = 'coverError';
+                    error.textContent = 'Invalid file (max 5MB, allowed types: jpeg, png, jpg, gif, svg)';
+                    fileInput.closest('.form-group').appendChild(error);
+                }
+                fileInput.classList.add('is-invalid');
+                return false;
+            }
+        }
+        if (errorElement) errorElement.remove();
+        fileInput.classList.remove('is-invalid');
+        return true;
+    };
+
+    fields.forEach(({ id, errorId }) => {
+        const field = document.getElementById(id);
+        if (field) {
+            field.addEventListener('input', () => validateField(id, errorId));
+            field.addEventListener('change', () => validateField(id, errorId));
+        }
+    });
+
+    document.getElementById('postCover').addEventListener('change', validateFile);
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        let formIsValid = true;
+
+        fields.forEach(({ id, errorId }) => {
+            const valid = validateField(id, errorId);
+            if (!valid) formIsValid = false;
+        });
+
+        if (tinyMCEInitialized) {
+            const contentValid = validateField('postContent', 'contentError');
+            if (!contentValid) formIsValid = false;
+        }
+
+        const fileValid = validateFile();
+        if (!fileValid) formIsValid = false;
+
+        if (formIsValid) {
+            const submitButton = form.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Updating...';
+
+            try {
+                if (tinyMCEInitialized) tinymce.triggerSave();
+                const formData = new FormData(form);
+
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) throw new Error(result.message || 'Update failed');
+
+                Toast.fire({
+                    icon: "success",
+                    title: result.message || 'Post updated successfully!'
+                });
+
+                setTimeout(() => {
+                    if (result.redirect) {
+                        window.location.href = result.redirect;
+                    }
+                }, 1500);
+
+            } catch (error) {
+                console.error('Update error:', error);
+                Swal.fire({
+                    title: 'Update Failed!',
+                    text: error.message,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            } finally {
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Edit Post';
+            }
+        }
+    });
+});
