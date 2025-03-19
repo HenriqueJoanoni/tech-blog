@@ -6,7 +6,7 @@
     <div class="container mx-auto px-4">
         <div class="relative group">
             <!-- Carousel container -->
-            <div class="swiper mySwiper relative w-full overflow-hidden">
+            <div class="swiper mySwiper relative w-full overflow-hidden z-40">
                 <div class="swiper-wrapper">
                     @foreach ($latestPosts as $post)
                         <div class="swiper-slide w-full flex-shrink-0 relative">

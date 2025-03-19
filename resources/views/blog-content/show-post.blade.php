@@ -20,17 +20,17 @@
                 </div>
             </div>
             <div class="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
-                <div class="flex items-start gap-4">
-                    <!-- Author Avatar -->
+                <div class="flex flex-col lg:flex-row items-center lg:items-start gap-6 lg:gap-4">
+                    <!-- Author Avatar (Mobile Top) -->
                     <img
-                        class="w-20 h-20 rounded-full border-2 border-gray-200 object-cover"
+                        class="w-20 h-20 rounded-full border-2 border-gray-200 object-cover mx-auto lg:mx-0 lg:block"
                         src="{{ $postData->user->avatar ? asset('storage/'.$postData->user->avatar) : asset('avatars/profile.png') }}"
                         alt="{{ $postData->user->name }}">
 
-                    <!-- Author Info -->
-                    <div class="flex-1">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-1">{{ $postData->user->name }}</h3>
-                        <p class="text-sm text-gray-500 mb-2">
+                    <!-- Author Info + Bio -->
+                    <div class="flex-1 w-full">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-1 text-center lg:text-left">{{ $postData->user->name }}</h3>
+                        <p class="text-sm text-gray-500 mb-2 text-center lg:text-left">
                             📅 Member since: {{ GeneralHandler::dateFmt($postData->user->created_at, "d/m/Y") }}
                         </p>
 
