@@ -949,3 +949,376 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
+/** STORE USER VALIDATION */
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('#storeUserForm');
+    let tinyMCEInitialized = false;
+
+    const initTinyMCEValidation = () => {
+        if (typeof tinymce !== 'undefined' && tinymce.get('bio')) {
+            tinyMCEInitialized = true;
+        }
+    };
+
+    const observer = new MutationObserver(initTinyMCEValidation);
+    observer.observe(document.body, {childList: true, subtree: true});
+
+    const fields = [
+        {
+            id: 'name',
+            errorId: 'nameError',
+            validate: (field) => field.value.trim() !== ''
+        },
+        {
+            id: 'email',
+            errorId: 'emailError',
+            validate: (field) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field.value)
+        },
+        {
+            id: 'password',
+            errorId: 'passwordError',
+            validate: (field) => field.value === '' || field.value.length >= 8
+        },
+        {
+            id: 'permission',
+            errorId: 'permissionError',
+            validate: (field) => field.value !== ''
+        },
+        {
+            id: 'avatarUpload',
+            errorId: 'avatarError',
+            validate: (field) => {
+                if (field.files.length === 0) return true;
+                const file = field.files[0];
+                const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                return validTypes.includes(file.type) && file.size <= 2048 * 1024;
+            }
+        }
+    ];
+
+    const validateField = ({id, errorId, validate}) => {
+        const field = document.getElementById(id);
+        const errorElement = document.getElementById(errorId);
+        const isValid = validate(field);
+
+        if (!isValid) {
+            field.classList.add('is-invalid');
+            if (!errorElement) {
+                const error = document.createElement('div');
+                error.className = 'text-danger mt-1';
+                error.id = errorId;
+                error.textContent = getErrorMessage(id);
+                field.closest('.form-group').appendChild(error);
+            }
+        } else {
+            field.classList.remove('is-invalid');
+            if (errorElement) errorElement.remove();
+        }
+
+        return isValid;
+    };
+
+    const getErrorMessage = (id) => {
+        const messages = {
+            'name': 'Name is required',
+            'email': 'Valid email is required',
+            'password': 'Password must be at least 8 characters',
+            'permission': 'Permission selection is required',
+            'avatarUpload': 'Invalid image (max 2MB, JPG/PNG/GIF)'
+        };
+        return messages[id] || 'Invalid value';
+    };
+
+    fields.forEach(({id, errorId, validate}) => {
+        const field = document.getElementById(id);
+        if (field) {
+            field.addEventListener('input', () => validateField({id, errorId, validate}));
+            field.addEventListener('change', () => validateField({id, errorId, validate}));
+        }
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        let formIsValid = true;
+
+        document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        document.querySelectorAll('.text-danger').forEach(el => el.remove());
+
+        fields.forEach(config => {
+            if (!validateField(config)) formIsValid = false;
+        });
+
+        if (!formIsValid) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: 'Please check required fields',
+                didOpen: () => document.querySelector('.is-invalid')?.scrollIntoView({behavior: 'smooth'})
+            });
+            return;
+        }
+
+        const submitButton = form.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Creating...';
+
+        try {
+            if (tinyMCEInitialized) {
+                tinymce.triggerSave();
+            }
+            const formData = new FormData(form);
+
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                if (data.errors) {
+                    Object.entries(data.errors).forEach(([field, messages]) => {
+                        const fieldId = field === 'avatar' ? 'avatarUpload' : field;
+                        const errorId = `${fieldId}Error`;
+                        const fieldElement = document.getElementById(fieldId);
+                        if (fieldElement) {
+                            fieldElement.classList.add('is-invalid');
+                            const error = document.createElement('div');
+                            error.className = 'text-danger mt-1';
+                            error.id = errorId;
+                            error.textContent = messages[0];
+                            fieldElement.closest('.form-group').appendChild(error);
+                        }
+                    });
+                    throw new Error('Validation errors occurred');
+                }
+                throw new Error(data.message || 'Creation failed');
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: data.message,
+                willClose: () => {
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    }
+                }
+            });
+
+            form.reset();
+            if (tinyMCEInitialized) {
+                tinymce.get('bio').setContent('');
+            }
+            document.getElementById('imagePreview').style.backgroundImage = `url('{{ asset('avatars/profile.png') }}')`;
+
+        } catch (error) {
+            Swal.fire({icon: 'error', title: 'Error!', text: error.message});
+        } finally {
+            submitButton.disabled = false;
+            submitButton.innerHTML = 'Create User';
+        }
+    });
+});
+
+/** UPDATE USER PROFILE VALIDATION */
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('#editUserProfileForm');
+    let tinyMCEInitialized = false;
+
+    const initTinyMCE = () => {
+        if (typeof tinymce !== 'undefined' && tinymce.get('bio')) {
+            tinyMCEInitialized = true;
+        }
+    };
+    const observer = new MutationObserver(initTinyMCE);
+    observer.observe(document.body, {childList: true, subtree: true});
+
+    const fields = [
+        {
+            id: 'name',
+            errorId: 'nameError',
+            validate: (field) => field && field.value.trim() !== ''
+        },
+        {
+            id: 'email',
+            errorId: 'emailError',
+            validate: (field) => field && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field.value)
+        },
+        {
+            id: 'permission',
+            errorId: 'permissionError',
+            validate: (field) => field && field.value !== ''
+        },
+        {
+            id: 'avatarUpload',
+            errorId: 'avatarUploadError',
+            validate: (field) => {
+                if (!field) return true;
+                if (field.files.length === 0) return true;
+                const file = field.files[0];
+                const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                return validTypes.includes(file.type) && file.size <= 2048 * 1024;
+            }
+        }
+    ];
+
+    const validateField = ({id, errorId, validate}) => {
+        const field = document.getElementById(id);
+        const errorElement = document.getElementById(errorId);
+
+        if (!field) {
+            console.warn(`Field with ID ${id} not found`);
+            return true;
+        }
+
+        const isValid = validate(field);
+
+        if (!isValid) {
+            field.classList.add('is-invalid');
+            if (!errorElement) {
+                const error = document.createElement('div');
+                error.className = 'text-danger mt-1';
+                error.id = errorId;
+                error.textContent = getErrorMessage(id);
+                field.closest('.form-group, .col-md-6, .col-5').appendChild(error);
+            }
+        } else {
+            field.classList.remove('is-invalid');
+            if (errorElement) errorElement.remove();
+        }
+
+        return isValid;
+    };
+
+    const validatePassword = () => {
+        const password = document.getElementById('new_password');
+        const confirm = document.getElementById('new_password_confirmation');
+        let isValid = true;
+
+        if (!password || !confirm) return true;
+
+        if (password.value || confirm.value) {
+            isValid = password.value === confirm.value && password.value.length >= 8;
+
+            const showError = (field, message) => {
+                const errorId = `${field.id}Error`;
+                const errorElement = document.getElementById(errorId);
+                field.classList.add('is-invalid');
+                if (!errorElement) {
+                    const error = document.createElement('div');
+                    error.className = 'text-danger mt-1';
+                    error.id = errorId;
+                    error.textContent = message;
+                    field.closest('.form-group').appendChild(error);
+                }
+            };
+
+            if (password.value.length < 8) {
+                showError(password, 'Password must be at least 8 characters');
+                isValid = false;
+            }
+
+            if (password.value !== confirm.value) {
+                showError(confirm, 'Passwords do not match');
+                isValid = false;
+            }
+        }
+
+        return isValid;
+    };
+
+    const getErrorMessage = (id) => {
+        const messages = {
+            'name': 'Name is required',
+            'email': 'Valid email is required',
+            'permission': 'Permission selection is required',
+            'avatarUpload': 'Invalid image (max 2MB, JPG/PNG/GIF)'
+        };
+        return messages[id] || 'Invalid value';
+    };
+
+    fields.forEach(({id, errorId, validate}) => {
+        const field = document.getElementById(id);
+        if (field) {
+            field.addEventListener('input', () => validateField({id, errorId, validate}));
+            field.addEventListener('change', () => validateField({id, errorId, validate}));
+        }
+    });
+
+    document.querySelectorAll('[name="new_password"], [name="new_password_confirmation"]').forEach(field => {
+        field.addEventListener('input', validatePassword);
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        let formIsValid = true;
+
+        document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        document.querySelectorAll('.text-danger').forEach(el => el.remove());
+
+        fields.forEach(config => {
+            if (!validateField(config)) formIsValid = false;
+        });
+
+        if (!validatePassword()) {
+            formIsValid = false;
+        }
+
+        if (!formIsValid) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: 'Please check required fields',
+                didOpen: () => document.querySelector('.is-invalid')?.scrollIntoView({behavior: 'smooth'})
+            });
+            return;
+        }
+
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalButtonHTML = submitButton.innerHTML;
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
+
+        try {
+            const formData = new FormData(form);
+            formData.append('_method', 'PUT');
+
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || 'Update failed');
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Profile updated successfully',
+                willClose: () => window.location.href = data.redirect || form.action
+            });
+
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: error.message
+            });
+        } finally {
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalButtonHTML;
+        }
+    });
+});

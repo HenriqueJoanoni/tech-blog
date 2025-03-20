@@ -29,6 +29,7 @@
                                                 onclick="document.getElementById('avatarUpload').click()">
                                             <i class="fas fa-camera"></i> Change Photo
                                         </button>
+                                        <div id="avatarUploadError" class="text-danger mt-1"></div>
                                     </div>
 
                                     <h4 class="mt-3 mb-0">{{ $user->name }}</h4>
@@ -42,8 +43,8 @@
 
                             <!-- Right Side - Profile Form -->
                             <div class="col-md-9">
-                                <form action="{{ route('admin.update-user', ['id' =>$user->id]) }}" method="POST"
-                                      enctype="multipart/form-data">
+                                <form action="{{ route('admin.update-user', ['id' => $user->id]) }}" method="POST"
+                                      id="editUserProfileForm" enctype="multipart/form-data">
                                     @csrf
                                     @method('PUT')
 
@@ -54,21 +55,17 @@
                                         <div class="col-md-6">
                                             <label class="form-label">Full Name</label>
                                             <input type="text" name="name"
-                                                   class="form-control @error('name') is-invalid @enderror"
+                                                   class="form-control"
                                                    value="{{ old('name', $user->name) }}">
-                                            @error('name')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
+                                            <div id="nameError" class="text-danger mt-1"></div>
                                         </div>
 
                                         <div class="col-md-6">
                                             <label class="form-label">Email Address</label>
                                             <input type="email" name="email"
-                                                   class="form-control @error('email') is-invalid @enderror"
+                                                   class="form-control"
                                                    value="{{ old('email', $user->email) }}">
-                                            @error('email')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
+                                            <div id="emailError" class="text-danger mt-1"></div>
                                         </div>
 
                                         <div class="col-12">
@@ -77,7 +74,7 @@
                                                 id="bio"
                                                 name="bio"
                                                 class="form-control"
-                                                content="{!! old('bio', auth()->user()->bio) !!}"
+                                                content="{!! old('bio', $user->bio) !!}"
                                                 :plugins="['autoresize', 'link', 'image', 'code', 'table']"
                                                 toolbar="undo redo | blocks | bold italic | alignleft aligncenter alignright | indent outdent | bullist numlist | code | table"
                                                 options="
@@ -96,15 +93,17 @@
                                                 <div class="col-md-6">
                                                     <label class="form-label">New Password</label>
                                                     <input type="password" name="new_password"
-                                                           class="form-control @error('new_password') is-invalid @enderror">
+                                                           class="form-control">
                                                     <small class="form-text text-muted">Minimum 8 characters</small>
                                                     <div id="passwordStrength" class="badge mt-2"></div>
+                                                    <div id="new_passwordError" class="text-danger mt-1"></div>
                                                 </div>
 
                                                 <div class="col-md-6">
                                                     <label class="form-label">Confirm New Password</label>
                                                     <input type="password" name="new_password_confirmation"
                                                            class="form-control">
+                                                    <div id="new_password_confirmationError" class="text-danger mt-1"></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -126,6 +125,7 @@
                                                         </option>
                                                     @endforeach
                                                 </select>
+                                                <div id="permissionError" class="text-danger mt-1"></div>
                                             </div>
                                         </div>
 

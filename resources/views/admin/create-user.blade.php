@@ -12,7 +12,8 @@
                     </div>
                     <div class="card-body">
                         <!-- Form for inserting a new post -->
-                        <form action="{{ route('admin.store-user') }}" method="post" enctype="multipart/form-data">
+                        <form action="{{ route('admin.store-user') }}" method="post" id="storeUserForm"
+                              enctype="multipart/form-data" novalidate>
                             @csrf
 
                             <div class="row">
@@ -27,6 +28,7 @@
                                                 onclick="document.getElementById('avatarUpload').click()">
                                             <i class="fas fa-camera"></i> Upload Profile Photo
                                         </button>
+                                        <div id="avatarError" class="text-danger mt-1"></div>
                                     </div>
                                     <input type="file" id="avatarUpload" name="avatar" class="d-none" accept="image/*"
                                            onchange="handleAvatarUpload(event)">
@@ -38,6 +40,7 @@
                                         <label for="name">Name</label>
                                         <input type="text" name="name" id="name" class="form-control"
                                                value="{{ old('name') }}">
+                                        <div id="nameError" class="text-danger mt-1"></div>
                                     </div>
                                 </div>
                             </div>
@@ -49,6 +52,7 @@
                                         <label for="email">Email</label>
                                         <input type="email" name="email" id="email" class="form-control"
                                                value="{{ old('email') }}">
+                                        <div id="emailError" class="text-danger mt-1"></div>
                                     </div>
                                 </div>
 
@@ -58,6 +62,7 @@
                                         <label for="password">Password</label>
                                         <input type="password" name="password" id="password" class="form-control"
                                                value="{{ old('password') }}">
+                                        <div id="passwordError" class="text-danger mt-1"></div>
                                     </div>
                                 </div>
                             </div>
@@ -79,6 +84,7 @@
                                     "
                                 />
                             </div>
+                            <div id="bioError" class="text-danger mt-1"></div>
 
                             <!-- Permission Field -->
                             <div class="form-group mb-3">
@@ -92,6 +98,7 @@
                                         </option>
                                     @endforeach
                                 </select>
+                                <div id="permissionError" class="text-danger mt-1"></div>
                             </div>
 
                             <!-- Buttons -->
