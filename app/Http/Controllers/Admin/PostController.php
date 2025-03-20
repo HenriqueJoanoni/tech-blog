@@ -183,7 +183,7 @@ class PostController extends Controller
         return \view('admin.create-category');
     }
 
-    public function storeCategory(Request $request): RedirectResponse
+    public function storeCategory(Request $request): JsonResponse | RedirectResponse
     {
         try {
             $request->validate([
@@ -205,9 +205,29 @@ class PostController extends Controller
 
             Category::create($normalized);
 
-            return redirect()->route('admin.categories')->with('success', 'Category created successfully');
+            return $request->ajax()
+                ? response()->json([
+                    'success' => true,
+                    'message' => 'Category created successfully',
+                    'redirect' => route('admin.categories')
+                ])
+                : redirect()->route('admin.categories')->with('success', 'Category created successfully');
+        } catch (ValidationException $e) {
+            return $request->ajax()
+                ? response()->json([
+                    'success' => false,
+                    'message' => 'Validation error',
+                    'errors' => $e->errors()
+                ], 422)
+                : redirect()->back()->withErrors($e->errors())->withInput();
+
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to create category')->withInput();
+            return $request->ajax()
+                ? response()->json([
+                    'success' => false,
+                    'message' => 'Error: ' . $e->getMessage()
+                ], 500)
+                : redirect()->back()->with('error', 'Error: ' . $e->getMessage());
         }
     }
 
@@ -218,32 +238,57 @@ class PostController extends Controller
         return view('admin.category-update', compact('category'));
     }
 
-    public function updateCategoryAction(Request $request): RedirectResponse
+    public function updateCategoryAction(Request $request)
     {
-        $category = Category::findOrFail($request->id);
+        try {
+            $category = Category::findOrFail($request->id);
 
-        $request->validate([
-            'category_name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255',
-            'category_icon' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'is_available' => 'required|integer',
-        ]);
+            $validated = $request->validate([
+                'category_name' => 'required|string|max:255',
+                'slug' => 'required|string|max:255',
+                'category_icon' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'is_available' => 'required|integer',
+            ]);
 
-        $normalized = $this->normalizeData(
-            $request->only(['category_name', 'slug', 'category_icon', 'is_available']),
-            'category'
-        );
+            $normalized = $this->normalizeData(
+                $request->only(['category_name', 'slug', 'is_available']),
+                'category'
+            );
 
-        if ($request->hasFile('category_icon')) {
-            if ($category->icon && Storage::disk('public')->exists($category->icon)) {
-                Storage::disk('public')->delete($category->icon);
+            if ($request->hasFile('category_icon')) {
+                if ($category->icon && Storage::disk('public')->exists($category->icon)) {
+                    Storage::disk('public')->delete($category->icon);
+                }
+                $normalized['icon'] = $request->file('category_icon')->store('icons', 'public');
             }
-            $normalized['icon'] = $request->file('category_icon')->store('icons', 'public');
+
+            $category->update($normalized);
+
+            return $request->ajax()
+                ? response()->json([
+                    'success' => true,
+                    'message' => 'Category updated successfully',
+                    'redirect' => route('admin.categories')
+                ])
+                : redirect()->route('admin.categories')->with('success', 'Category updated successfully');
+
+        } catch (ValidationException $e) {
+            return $request->ajax()
+                ? response()->json([
+                    'success' => false,
+                    'message' => 'Validation error',
+                    'errors' => $e->errors()
+                ], 422)
+                : redirect()->back()->withErrors($e->errors())->withInput();
+
+        } catch (\Exception $e) {
+            return $request->ajax()
+                ? response()->json([
+                    'success' => false,
+                    'message' => 'Error: ' . $e->getMessage()
+                ], 500)
+                : redirect()->back()->with('error', 'Error: ' . $e->getMessage());
         }
-
-        $category->update($normalized);
-
-        return redirect()->route('admin.categories')->with('success', 'Category updated successfully.');
     }
 
     public function deleteCategory(Request $request): JsonResponse

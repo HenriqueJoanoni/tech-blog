@@ -246,17 +246,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function handleCategoryIconUpload(event) {
     const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
     const preview = document.getElementById('imagePreview');
 
+    if (!file) {
+        return;
+    }
+
+    const reader = new FileReader();
     reader.onload = function(e) {
         preview.style.backgroundImage = `url(${e.target.result})`;
         preview.style.display = 'none';
-        preview.offsetHeight;
+        void preview.offsetHeight;
         preview.style.display = 'block';
-    }
+    };
+
     reader.readAsDataURL(file);
 }
 
@@ -659,6 +662,290 @@ document.addEventListener('DOMContentLoaded', function() {
                 submitButton.disabled = false;
                 submitButton.innerHTML = 'Edit Post';
             }
+        }
+    });
+});
+
+/** STORE CATEGORY VALIDATION */
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('#storeCategoryForm');
+    const slugInput = document.getElementById('slug');
+    const imagePreview = document.getElementById('imagePreview');
+
+    const fields = [
+        {id: 'category-name', errorId: 'nameError', validate: (field) => field.value.trim() !== ''},
+        {
+            id: 'category-icon',
+            errorId: 'iconError',
+            validate: (field) => {
+                if (field.files.length === 0) return false;
+                const file = field.files[0];
+                const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml'];
+                return validTypes.includes(file.type) && file.size <= 2048 * 1024;
+            }
+        },
+        {
+            id: 'visibility',
+            errorId: 'visibilityError',
+            validate: (field) => field.value !== ''
+        }
+    ];
+
+    const validateField = ({id, errorId, validate}) => {
+        const field = document.getElementById(id);
+        const errorElement = document.getElementById(errorId);
+        const isValid = validate(field);
+
+        if (!isValid) {
+            field.classList.add('is-invalid');
+            if (!errorElement) {
+                const error = document.createElement('div');
+                error.className = 'text-danger mt-1';
+                error.id = errorId;
+                error.textContent = getErrorMessage(id);
+                field.closest('.form-group').appendChild(error);
+            }
+        } else {
+            field.classList.remove('is-invalid');
+            if (errorElement) errorElement.remove();
+        }
+
+        return isValid;
+    };
+
+    const getErrorMessage = (id) => {
+        const messages = {
+            'category-name': 'Category name is required',
+            'category-icon': 'Icon is required (max 2MB, JPG/PNG/GIF/SVG)',
+            'visibility': 'Please select visibility status'
+        };
+        return messages[id] || 'This field is required';
+    };
+
+    fields.forEach(({id, errorId, validate}) => {
+        const field = document.getElementById(id);
+        if (field) {
+            field.addEventListener('input', () => validateField({id, errorId, validate}));
+            field.addEventListener('change', () => validateField({id, errorId, validate}));
+        }
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        let formIsValid = true;
+
+        document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        document.querySelectorAll('.text-danger').forEach(el => el.remove());
+
+        fields.forEach(config => {
+            if (!validateField(config)) formIsValid = false;
+        });
+
+        if (!formIsValid) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: 'Please check required fields',
+                didOpen: () => document.querySelector('.is-invalid')?.scrollIntoView({behavior: 'smooth'})
+            });
+            return;
+        }
+
+        const submitButton = form.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Creating...';
+
+        try {
+            const formData = new FormData(form);
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                if (data.errors) {
+                    Object.entries(data.errors).forEach(([field, messages]) => {
+                        const fieldId = field === 'category_icon' ? 'category-icon' : field.replace('_', '-');
+                        const errorId = `${fieldId}Error`;
+                        const fieldElement = document.getElementById(fieldId);
+                        if (fieldElement) {
+                            fieldElement.classList.add('is-invalid');
+                            const error = document.createElement('div');
+                            error.className = 'text-danger mt-1';
+                            error.id = errorId;
+                            error.textContent = messages[0];
+                            fieldElement.closest('.form-group').appendChild(error);
+                        }
+                    });
+                    throw new Error('Validation errors occurred');
+                }
+                throw new Error(data.message || 'Submission failed');
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: data.message,
+                willClose: () => data.redirect && (window.location.href = data.redirect)
+            });
+
+            if (!data.redirect) {
+                form.reset();
+                slugInput.value = '';
+                imagePreview.style.backgroundImage = `url('{{ asset('avatars/application.png') }}')`;
+            }
+
+        } catch (error) {
+            Swal.fire({icon: 'error', title: 'Error!', text: error.message});
+        } finally {
+            submitButton.disabled = false;
+            submitButton.innerHTML = 'Create category';
+        }
+    });
+});
+
+/** UPDATE CATEGORY VALIDATION */
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('#updateCategoryForm');
+
+    const fields = [
+        {id: 'category-name', errorId: 'nameError', validate: (field) => field.value.trim() !== ''},
+        {
+            id: 'category-icon',
+            errorId: 'iconError',
+            validate: (field) => {
+                if (field.files.length > 0) {
+                    const file = field.files[0];
+                    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml'];
+                    return validTypes.includes(file.type) && file.size <= 2048 * 1024;
+                }
+                return true;
+            }
+        },
+        {
+            id: 'visibility',
+            errorId: 'visibilityError',
+            validate: (field) => field.value !== ''
+        }
+    ];
+
+    const validateField = ({id, errorId, validate}) => {
+        const field = document.getElementById(id);
+        const errorElement = document.getElementById(errorId);
+        const isValid = validate(field);
+
+        if (!isValid) {
+            field.classList.add('is-invalid');
+            if (!errorElement) {
+                const error = document.createElement('div');
+                error.className = 'text-danger mt-1';
+                error.id = errorId;
+                error.textContent = getErrorMessage(id);
+                field.closest('.form-group').appendChild(error);
+            }
+        } else {
+            field.classList.remove('is-invalid');
+            if (errorElement) errorElement.remove();
+        }
+
+        return isValid;
+    };
+
+    const getErrorMessage = (id) => {
+        const messages = {
+            'category-name': 'Category name is required',
+            'category-icon': 'Invalid image (max 2MB, JPG/PNG/GIF/SVG)',
+            'visibility': 'Please select visibility status'
+        };
+        return messages[id] || 'This field is required';
+    };
+
+    fields.forEach(({id, errorId, validate}) => {
+        const field = document.getElementById(id);
+        if (field) {
+            field.addEventListener('input', () => validateField({id, errorId, validate}));
+            field.addEventListener('change', () => validateField({id, errorId, validate}));
+        }
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        let formIsValid = true;
+
+        document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        document.querySelectorAll('.text-danger').forEach(el => el.remove());
+
+        fields.forEach(config => {
+            if (!validateField(config)) formIsValid = false;
+        });
+
+        if (!formIsValid) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: 'Please check required fields',
+                didOpen: () => document.querySelector('.is-invalid')?.scrollIntoView({behavior: 'smooth'})
+            });
+            return;
+        }
+
+        const submitButton = form.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Updating...';
+
+        try {
+            const formData = new FormData(form);
+            formData.append('_method', 'PUT');
+
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                if (data.errors) {
+                    Object.entries(data.errors).forEach(([field, messages]) => {
+                        const fieldId = field === 'category_icon' ? 'category-icon' : field.replace('_', '-');
+                        const errorId = `${fieldId}Error`;
+                        const fieldElement = document.getElementById(fieldId);
+                        if (fieldElement) {
+                            fieldElement.classList.add('is-invalid');
+                            const error = document.createElement('div');
+                            error.className = 'text-danger mt-1';
+                            error.id = errorId;
+                            error.textContent = messages[0];
+                            fieldElement.closest('.form-group').appendChild(error);
+                        }
+                    });
+                    throw new Error('Validation errors occurred');
+                }
+                throw new Error(data.message || 'Update failed');
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Updated!',
+                text: data.message,
+                willClose: () => data.redirect && (window.location.href = data.redirect)
+            });
+
+        } catch (error) {
+            Swal.fire({icon: 'error', title: 'Error!', text: error.message});
+        } finally {
+            submitButton.disabled = false;
+            submitButton.innerHTML = 'Update category';
         }
     });
 });
