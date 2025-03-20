@@ -11,7 +11,7 @@
                         <h3 class="card-title">Editing Post: <b>{{ $post[0]->title }}</b></h3>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('admin.update-post') }}" method="post" enctype="multipart/form-data">
+                        <form action="{{ route('admin.update-post') }}" method="post" id="updatePost" enctype="multipart/form-data" novalidate>
                             @csrf
                             <input type="hidden" name="id" value="{{$post[0]->id}}" {{old($post[0]->id)}}>
 
@@ -20,6 +20,9 @@
                                 <label for="postTitle">Title</label>
                                 <input type="text" name="title" id="postTitle" class="form-control"
                                        value="{{ old('title', $post[0]->title) }}">
+                                @error('title')
+                                    <div id="titleError" class="text-danger mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <!-- Excerpt Field -->
@@ -27,6 +30,9 @@
                                 <label for="postExcerpt">Excerpt</label>
                                 <input type="text" name="excerpt" id="postExcerpt" class="form-control"
                                        value="{{ old('excerpt', $post[0]->excerpt) }}">
+                                @error('excerpt')
+                                    <div id="excerptError" class="text-danger mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <!-- Content Field -->
@@ -45,12 +51,18 @@
                                         content_style: 'body { font-family: sans-serif; }'
                                     "
                                 />
+                                @error('postContent')
+                                    <div id="contentError" class="text-danger mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <!-- Cover Upload Field -->
                             <div class="form-group mb-3">
                                 <label for="postCover">Upload Cover</label>
                                 <input type="file" name="cover" id="postCover" class="form-control-file">
+                                @error('cover')
+                                    <div id="coverError" class="text-danger mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <!-- Category Field -->
@@ -65,6 +77,9 @@
                                         </option>
                                     @endforeach
                                 </select>
+                                @error('category_id')
+                                    <div id="categoryError" class="text-danger mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             @if(auth()->user()->permission_id == config('app.admin_access'))

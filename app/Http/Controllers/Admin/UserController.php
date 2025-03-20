@@ -16,6 +16,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
@@ -48,42 +49,59 @@ class UserController extends Controller
         ]);
     }
 
-    public function storeUser(Request $request): RedirectResponse
+    public function storeUser(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'bio' => 'nullable|string|max:1000',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'permission_id' => 'required|integer|exists:user_permissions,id'
-        ]);
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email',
+                'bio' => 'nullable|string|max:1000',
+                'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'permission_id' => 'required|integer|exists:user_permissions,id',
+                'password' => 'nullable|string|min:8'
+            ]);
 
-        $path = '';
-        if ($request->hasFile('avatar')) {
-            $path = $request->file('avatar')->store('avatars', 'public');
+            $path = null;
+            if ($request->hasFile('avatar')) {
+                $path = $request->file('avatar')->store('avatars', 'public');
+            }
+
+            $userData = [
+                'name' => $request->name,
+                'email' => $request->email,
+                'bio' => $request->bio,
+                'avatar' => $path,
+                'permission_id' => $request->permission_id,
+                'password' => $request->password ? Hash::make($request->password) : Hash::make(config('app.default_user_password')),
+            ];
+
+            User::create($userData);
+
+            return $request->ajax()
+                ? response()->json([
+                    'success' => true,
+                    'message' => 'User created successfully',
+                    'redirect' => route('admin.users')
+                ])
+                : redirect()->route('admin.users')->with('success', 'User created!');
+
+        } catch (ValidationException $e) {
+            return $request->ajax()
+                ? response()->json([
+                    'success' => false,
+                    'message' => 'Validation error',
+                    'errors' => $e->errors()
+                ], 422)
+                : redirect()->back()->withErrors($e->errors())->withInput();
+
+        } catch (\Exception $e) {
+            return $request->ajax()
+                ? response()->json([
+                    'success' => false,
+                    'message' => 'Error: ' . $e->getMessage()
+                ], 500)
+                : redirect()->back()->with('error', 'Error: ' . $e->getMessage());
         }
-
-        $hashedPassword = '';
-        if ($request->filled('password')) {
-            $hashedPassword = Hash::make($request->password);
-        }
-
-        $normalizedData = $this->normalizeData($request->only('name', 'email', 'bio', 'avatar', 'permission_id'));
-
-        $created = User::create([
-            'name' => $normalizedData['name'],
-            'email' => $normalizedData['email'],
-            'bio' => $normalizedData['bio'],
-            'avatar' => $path,
-            'password' => $hashedPassword ?? Hash::make(config('app.default_user_password')),
-            'permission_id' => $normalizedData['permission_id'],
-        ]);
-
-        if (!$created) {
-            return back()->withErrors(['error' => 'user not created'])->withInput();
-        }
-
-        return redirect()->route('admin.users')->with('success', 'User created!');
     }
 
     public function deleteUser(Request $request): JsonResponse
@@ -122,37 +140,60 @@ class UserController extends Controller
         ]);
     }
 
-    public function updateUser(Request $request): RedirectResponse
+    public function updateUser(Request $request)
     {
-        $user = User::find($request->id);
+        try {
+            $user = User::findOrFail($request->id);
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,'.$user->id,
-            'bio' => 'nullable|string|max:1000',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'permission_id' => 'required|integer|exists:user_permissions,id',
-            'new_password' => 'nullable|confirmed|min:8',
-        ]);
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email,' . $user->id,
+                'bio' => 'nullable|string|max:1000',
+                'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'permission_id' => 'required|integer|exists:user_permissions,id',
+                'new_password' => 'nullable|confirmed|min:8',
+            ]);
 
-        if ($request->hasFile('avatar')) {
-            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
-                Storage::disk('public')->delete($user->avatar);
+            $updateData = $this->normalizeData($request->only('name', 'email', 'bio', 'permission_id'));
+
+            if ($request->hasFile('avatar')) {
+                if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                    Storage::disk('public')->delete($user->avatar);
+                }
+                $updateData['avatar'] = $request->file('avatar')->store('avatars', 'public');
             }
 
-            $path = $request->file('avatar')->store('avatars', 'public');
-            $user->avatar = $path;
+            if ($request->filled('new_password')) {
+                $updateData['password'] = Hash::make($request->new_password);
+            }
+
+            $user->update($updateData);
+
+            return $request->ajax()
+                ? response()->json([
+                    'success' => true,
+                    'message' => 'User updated successfully',
+                    'redirect' => route('admin.users')
+                ])
+                : redirect()->route('admin.users')->with('success', 'User updated successfully');
+
+        } catch (ValidationException $e) {
+            return $request->ajax()
+                ? response()->json([
+                    'success' => false,
+                    'message' => 'Validation error',
+                    'errors' => $e->errors()
+                ], 422)
+                : redirect()->back()->withErrors($e->errors())->withInput();
+
+        } catch (\Exception $e) {
+            return $request->ajax()
+                ? response()->json([
+                    'success' => false,
+                    'message' => 'Error: ' . $e->getMessage()
+                ], 500)
+                : redirect()->back()->with('error', 'Error: ' . $e->getMessage());
         }
-
-        if ($request->filled('new_password')) {
-            $user->password = Hash::make($request->new_password);
-        }
-
-        $sanitizedData = $this->normalizeData($request->only('name', 'email', 'bio', 'permission_id'));
-
-        $user->update($sanitizedData);
-
-        return redirect()->route('admin.users')->with('success', 'User updated successfully');
     }
 
     public function resetPassword(Request $request): RedirectResponse

@@ -12,7 +12,7 @@
                     </div>
                     <div class="card-body">
                         <!-- Form for inserting a new category -->
-                        <form action="{{ route('admin.store-category') }}" method="post" enctype="multipart/form-data">
+                        <form action="{{ route('admin.store-category') }}" method="post" id="storeCategoryForm" enctype="multipart/form-data" novalidate>
                             @csrf
 
                             <div class="row">
@@ -22,6 +22,7 @@
                                         <input type="text" name="category_name" id="category-name" class="form-control"
                                                value="{{ old('category_name') }}" onkeydown="generateSlug()">
                                     </div>
+                                    <div id="category-nameError" class="text-danger mt-1"></div>
                                 </div>
 
                                 <div class="col-6">
@@ -30,6 +31,7 @@
                                         <input type="text" name="slug" id="slug" class="form-control"
                                                value="{{ old('slug') }}" readonly>
                                     </div>
+                                    <div id="slugError" class="text-danger mt-1"></div>
                                 </div>
                             </div>
 
@@ -46,10 +48,16 @@
                                                 onclick="document.getElementById('category-icon').click()">
                                             <i class="fas fa-camera"></i> Upload Category Icon
                                         </button>
+                                        <div id="category-iconError" class="text-danger mt-1"></div>
                                     </div>
-                                    <input type="file" id="category-icon" name="category_icon" class="d-none" accept="image/*"
+                                    <input type="file"
+                                           id="category-icon"
+                                           name="category_icon"
+                                           class="d-none"
+                                           accept="image/*"
                                            onchange="handleCategoryIconUpload(event)">
                                 </div>
+
                                 <div class="col-6">
                                     <div class="form-group mb-3">
                                         <label for="visibility">Visibility</label>
@@ -58,6 +66,7 @@
                                             <option value="0">Not visible</option>
                                             <option value="1">Visible</option>
                                         </select>
+                                        <div id="visibilityError" class="text-danger mt-1"></div>
                                     </div>
                                 </div>
                             </div>

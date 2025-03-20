@@ -12,21 +12,23 @@
                     </div>
                     <div class="card-body">
                         <!-- Form for inserting a new post -->
-                        <form action="{{ route('admin.store-post') }}" method="post" enctype="multipart/form-data">
+                        <form action="{{ route('admin.store-post') }}" id="storePost" method="post" enctype="multipart/form-data" novalidate>
                             @csrf
 
                             <!-- Title Field -->
                             <div class="form-group mb-3">
                                 <label for="postTitle">Title</label>
-                                <input type="text" name="title" id="postTitle" class="form-control"
+                                <input type="text" name="title" id="postTitle" class="form-control inputField"
                                        value="{{ old('title') }}">
+                                <div id="titleError" class="text-danger mt-1"></div>
                             </div>
 
                             <!-- Excerpt Field -->
                             <div class="form-group mb-3">
                                 <label for="postExcerpt">Excerpt</label>
-                                <input type="text" name="excerpt" id="postExcerpt" class="form-control"
+                                <input type="text" name="excerpt" id="postExcerpt" class="form-control inputField"
                                        value="{{ old('excerpt') }}">
+                                <div id="excerptError" class="text-danger mt-1"></div>
                             </div>
 
                             <!-- Content Field -->
@@ -35,7 +37,7 @@
                                 <x-forms.tinymce-editor
                                     id="postContent"
                                     name="postContent"
-                                    class="form-control"
+                                    class="form-control inputField"
                                     content="{{ old('postContent') }}"
                                     :plugins="['autoresize', 'link', 'image', 'code', 'table']"
                                     toolbar="undo redo | blocks | bold italic | alignleft aligncenter alignright | indent outdent | bullist numlist | code | table"
@@ -45,12 +47,14 @@
                                         content_style: 'body { font-family: sans-serif; }'
                                     "
                                 />
+                                <div id="contentError" class="text-danger mt-1"></div>
                             </div>
 
                             <!-- Cover Upload Field -->
                             <div class="form-group mb-3">
                                 <label for="postCover">Upload Cover</label>
-                                <input type="file" name="cover" id="postCover" class="form-control-file">
+                                <input type="file" name="cover" id="postCover" class="form-control-file inputField">
+                                <div id="coverError" class="text-danger mt-1"></div>
                             </div>
 
                             <!-- Category Field -->
@@ -65,6 +69,7 @@
                                         </option>
                                     @endforeach
                                 </select>
+                                <div id="categoryError" class="text-danger mt-1"></div>
                             </div>
 
                             <!-- Buttons -->

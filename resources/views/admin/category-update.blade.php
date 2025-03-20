@@ -12,7 +12,7 @@
                     </div>
                     <div class="card-body">
                         <!-- Form for inserting a new category -->
-                        <form action="{{ route('admin.update-category-action') }}" method="post"
+                        <form action="{{ route('admin.update-category-action') }}" id="updateCategoryForm" method="post"
                               enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
