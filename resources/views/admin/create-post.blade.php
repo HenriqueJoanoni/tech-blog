@@ -53,8 +53,24 @@
                             <!-- Cover Upload Field -->
                             <div class="form-group mb-3">
                                 <label for="postCover">Upload Cover</label>
-                                <input type="file" name="cover" id="postCover" class="form-control-file inputField">
-                                <div id="coverError" class="text-danger mt-1"></div>
+                                <div class="cover-upload-container position-relative">
+                                    <div class="cover-preview" id="coverPreview">
+                                        <div class="preview-content">
+                                            <i class="fas fa-image fa-3x text-muted"></i>
+                                            <div class="mt-2">Click to upload cover image</div>
+                                            <div class="text-muted small">Recommended size: 1200x630px</div>
+                                        </div>
+                                    </div>
+                                    <input type="file" name="cover" id="postCover"
+                                           class="form-control-file inputField d-none"
+                                           accept="image/*"
+                                           onchange="handleCoverPreview(event)">
+                                            <button type="button" class="btn btn-outline-secondary mt-2"
+                                                    onclick="document.getElementById('postCover').click()">
+                                                <i class="fas fa-upload me-2"></i>Choose File
+                                            </button>
+                                    <div id="coverError" class="text-danger mt-1"></div>
+                                </div>
                             </div>
 
                             <!-- Category Field -->

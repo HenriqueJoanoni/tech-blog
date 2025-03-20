@@ -58,7 +58,7 @@ Route::middleware(['auth', 'checkPerm:' . config('admin_access')])->group(functi
     Route::post('/admin/posts/store', [PostController::class, 'storePost'])->name('admin.store-post');
 
     Route::get('/admin/edit-post/{id}', [PostController::class, 'editPost'])->name('admin.edit-post');
-    Route::post('/admin/edit-post', [PostController::class, 'updatePost'])->name('admin.update-post');
+    Route::put('/admin/edit-post', [PostController::class, 'updatePost'])->name('admin.update-post');
 
     Route::delete('/admin/delete-post/{id}', [PostController::class, 'deletePost'])->name('admin.delete-post');
     Route::post('/admin/{id}/toggle-visibility', [PostController::class, 'toggleVisibility'])->name('admin.toggle-visibility');

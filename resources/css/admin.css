@@ -60,3 +60,73 @@ html {
     background-size: cover;
     background-position: center;
 }
+
+/** POST COVER UPLOAD */
+.cover-upload-container {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    transition: border-color 0.3s ease;
+}
+
+.cover-upload-container:hover {
+    border-color: #0d6efd;
+}
+
+.cover-preview {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.preview-content {
+    text-align: center;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 6px;
+}
+
+.cover-preview.has-image .preview-content {
+    display: none;
+}
+
+.cover-preview:hover .preview-content {
+    display: block;
+    background: rgba(255, 255, 255, 0.8);
+}
+
+
+.cover-upload-container {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    transition: border-color 0.3s ease;
+}
+
+.cover-upload-container:hover {
+    border-color: #0d6efd;
+}
+
+.preview-content {
+    text-align: center;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 6px;
+}
+
+.cover-preview.has-image .preview-content {
+    display: none;
+}
+
+.cover-preview:hover .preview-content {
+    display: block;
+    background: rgba(255, 255, 255, 0.8);
+}
+

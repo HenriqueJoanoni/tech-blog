@@ -370,7 +370,7 @@ document.addEventListener('DOMContentLoaded', function() {
  *****************************************/
 
 /** STORE POST VALIDATION */
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('#storePost');
     let tinyMCEInitialized = false;
 
@@ -382,17 +382,59 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     const observer = new MutationObserver(initTinyMCEValidation);
-    observer.observe(document.body, {childList: true, subtree: true});
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    const handleCoverPreview = (event) => {
+        const input = event.target;
+        const preview = document.getElementById('coverPreview');
+        const errorDiv = document.getElementById('coverError');
+        const file = input.files[0];
+
+        preview.classList.remove('has-image', 'has-error');
+        errorDiv.textContent = '';
+
+        if (file) {
+            if (!file.type.startsWith('image/')) {
+                errorDiv.textContent = 'Please select a valid image file';
+                preview.classList.add('has-error');
+                input.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.style.backgroundImage = `url(${e.target.result})`;
+                preview.classList.add('has-image');
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     const validateField = (fieldId, errorId) => {
         const field = document.getElementById(fieldId);
         const errorElement = document.getElementById(errorId);
         let isValid = true;
+        let errorMessage = 'This field is required';
 
-        if (!field) return true;
+        if (!field) {
+            return true;
+        }
 
         if (fieldId === 'postContent' && tinyMCEInitialized) {
             isValid = tinymce.get(fieldId).getContent().trim().length > 0;
+        } else if (fieldId === 'postCover') {
+            if (field.files.length > 0) {
+                const file = field.files[0];
+                if (!file.type.startsWith('image/')) {
+                    isValid = false;
+                    errorMessage = 'Invalid file type (only images allowed)';
+                } else if (file.size > 5 * 1024 * 1024) {
+                    isValid = false;
+                    errorMessage = 'File too large (max 5MB)';
+                }
+            } else {
+                isValid = false;
+            }
         } else if (field.type === 'file') {
             isValid = field.files.length > 0;
         } else if (field.tagName === 'SELECT') {
@@ -403,11 +445,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!isValid) {
             field.classList.add('is-invalid');
-            if (!errorElement) {
+            if (errorElement) {
+                errorElement.textContent = errorMessage;
+            } else {
                 const error = document.createElement('div');
                 error.className = 'text-danger mt-1';
                 error.id = errorId;
-                error.textContent = 'This field is required';
+                error.textContent = errorMessage;
                 field.closest('.form-group').appendChild(error);
             }
         } else {
@@ -419,40 +463,67 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     const fields = [
-        {id: 'postTitle', errorId: 'titleError'},
-        {id: 'postExcerpt', errorId: 'excerptError'},
-        {id: 'postCategory', errorId: 'categoryError'},
-        {id: 'postCover', errorId: 'coverError'}
+        { id: 'postTitle', errorId: 'titleError' },
+        { id: 'postExcerpt', errorId: 'excerptError' },
+        { id: 'postCategory', errorId: 'categoryError' },
+        { id: 'postCover', errorId: 'coverError' }
     ];
 
-    fields.forEach(({id, errorId}) => {
+    fields.forEach(({ id, errorId }) => {
         const field = document.getElementById(id);
         if (field) {
             field.addEventListener('input', () => validateField(id, errorId));
-            field.addEventListener('change', () => validateField(id, errorId));
+            field.addEventListener('change', (e) => {
+                if (id === 'postCover') handleCoverPreview(e);
+                validateField(id, errorId);
+            });
         }
     });
 
+    const coverPreview = document.getElementById('coverPreview');
+    if (coverPreview) {
+        coverPreview.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            coverPreview.classList.add('dragover');
+        });
+
+        coverPreview.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            coverPreview.classList.remove('dragover');
+        });
+
+        coverPreview.addEventListener('drop', (e) => {
+            e.preventDefault();
+            coverPreview.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('postCover').files = files;
+                const event = new Event('change');
+                document.getElementById('postCover').dispatchEvent(event);
+            }
+        });
+    }
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        let isValid = true;
+        let formIsValid = true;
 
-        fields.forEach(({id, errorId}) => {
-            if (!validateField(id, errorId)) isValid = false;
+        fields.forEach(({ id, errorId }) => {
+            if (!validateField(id, errorId)) formIsValid = false;
         });
 
         if (tinyMCEInitialized && !validateField('postContent', 'contentError')) {
-            isValid = false;
+            formIsValid = false;
         }
 
-        if (!isValid) {
+        if (!formIsValid) {
             Swal.fire({
                 icon: 'error',
                 title: 'Validation Error',
-                html: 'Please fill all required fields correctly',
+                html: 'Please check all required fields',
                 didOpen: () => {
                     const firstInvalid = document.querySelector('.is-invalid');
-                    if (firstInvalid) firstInvalid.scrollIntoView({behavior: 'smooth'});
+                    if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth' });
                 }
             });
             return;
@@ -463,7 +534,9 @@ document.addEventListener('DOMContentLoaded', function () {
         submitButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
 
         try {
-            if (tinyMCEInitialized) tinymce.triggerSave();
+            if (tinyMCEInitialized) {
+                tinymce.triggerSave();
+            }
             const formData = new FormData(form);
 
             const response = await fetch(form.action, {
@@ -476,7 +549,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             const data = await response.json();
-
             if (!response.ok) {
                 throw new Error(data.message || 'Submission failed');
             }
@@ -493,7 +565,11 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             form.reset();
-            if (tinyMCEInitialized) tinymce.get('postContent').setContent('');
+            if (tinyMCEInitialized) {
+                tinymce.get('postContent').setContent('');
+            }
+            coverPreview.style.backgroundImage = '';
+            coverPreview.classList.remove('has-image');
 
         } catch (error) {
             console.error('Submission error:', error);
@@ -511,7 +587,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 /** UPDATE POST VALIDATION */
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form[action="{{ route(\'admin.update-post\') }}"]');
+    const form = document.querySelector('#updatePost');
     let tinyMCEInitialized = false;
 
     const initTinyMCEValidation = () => {
@@ -524,18 +600,56 @@ document.addEventListener('DOMContentLoaded', function() {
     const observer = new MutationObserver(initTinyMCEValidation);
     observer.observe(document.body, { childList: true, subtree: true });
 
+    function handleCoverPreview(event) {
+        const file = event.target.files[0];
+        coverError.textContent = '';
+        coverPreview.classList.remove('has-error');
+
+        if (file) {
+            if (!file.type.startsWith('image/')) {
+                coverError.textContent = 'Please select a valid image file';
+                coverPreview.classList.add('has-error');
+                coverInput.value = '';
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                coverError.textContent = 'File size too large (max 5MB)';
+                coverPreview.classList.add('has-error');
+                coverInput.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                coverPreview.style.backgroundImage = `url(${e.target.result})`;
+                coverPreview.classList.add('has-image');
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
     const validateField = (fieldId, errorId) => {
         const field = document.getElementById(fieldId);
         const errorElement = document.getElementById(errorId);
         let isValid = true;
+        let errorMessage = 'This field is required';
 
         if (!field) return true;
 
         if (fieldId === 'postContent' && tinyMCEInitialized) {
-            const content = tinymce.get(fieldId).getContent().trim();
-            isValid = content.length > 0;
-        } else if (field.type === 'file') {
-            isValid = field.files.length > 0;
+            isValid = tinymce.get(fieldId).getContent().trim().length > 0;
+        } else if (fieldId === 'postCover') {
+            if (field.files.length > 0) {
+                const file = field.files[0];
+                if (!file.type.startsWith('image/')) {
+                    isValid = false;
+                    errorMessage = 'Invalid file type (only images allowed)';
+                } else if (file.size > 5 * 1024 * 1024) {
+                    isValid = false;
+                    errorMessage = 'File too large (max 5MB)';
+                }
+            }
         } else if (field.tagName === 'SELECT') {
             isValid = field.value !== '';
         } else {
@@ -543,17 +657,21 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (!isValid) {
-            if (!errorElement) {
+            field.classList.add('is-invalid');
+            if (errorElement) {
+                errorElement.textContent = errorMessage;
+            } else {
                 const error = document.createElement('div');
                 error.className = 'text-danger mt-1';
                 error.id = errorId;
-                error.textContent = 'This field is required';
+                error.textContent = errorMessage;
                 field.closest('.form-group').appendChild(error);
             }
-            field.classList.add('is-invalid');
         } else {
-            if (errorElement) errorElement.remove();
             field.classList.remove('is-invalid');
+            if (errorElement) {
+                errorElement.remove();
+            }
         }
 
         return isValid;
@@ -562,33 +680,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const fields = [
         { id: 'postTitle', errorId: 'titleError' },
         { id: 'postExcerpt', errorId: 'excerptError' },
-        { id: 'postCategory', errorId: 'categoryError' },
+        { id: 'postCategory', errorId: 'categoryError' }
     ];
-
-    const validateFile = () => {
-        const fileInput = document.getElementById('postCover');
-        const errorElement = document.getElementById('coverError');
-        if (fileInput.files.length > 0) {
-            const file = fileInput.files[0];
-            const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/svg+xml'];
-            const isValid = validTypes.includes(file.type) && file.size <= 5048 * 1024;
-
-            if (!isValid) {
-                if (!errorElement) {
-                    const error = document.createElement('div');
-                    error.className = 'text-danger mt-1';
-                    error.id = 'coverError';
-                    error.textContent = 'Invalid file (max 5MB, allowed types: jpeg, png, jpg, gif, svg)';
-                    fileInput.closest('.form-group').appendChild(error);
-                }
-                fileInput.classList.add('is-invalid');
-                return false;
-            }
-        }
-        if (errorElement) errorElement.remove();
-        fileInput.classList.remove('is-invalid');
-        return true;
-    };
 
     fields.forEach(({ id, errorId }) => {
         const field = document.getElementById(id);
@@ -598,70 +691,112 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    document.getElementById('postCover').addEventListener('change', validateFile);
+    const coverPreview = document.getElementById('coverPreview');
+    const coverInput = document.getElementById('postCover');
+    const coverError = document.getElementById('coverError');
 
-    form.addEventListener('submit', async function(e) {
+    if (coverPreview.style.backgroundImage.includes('url("")')) {
+        coverPreview.style.backgroundImage = '';
+    } else {
+        coverPreview.classList.add('has-image');
+    }
+
+    coverInput.addEventListener('change', handleCoverPreview);
+    coverPreview.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        coverPreview.classList.add('dragover');
+    });
+
+    coverPreview.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        coverPreview.classList.remove('dragover');
+    });
+
+    coverPreview.addEventListener('drop', (e) => {
+        e.preventDefault();
+        coverPreview.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            coverInput.files = files;
+            handleCoverPreview({target: coverInput});
+        }
+    });
+
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
         let formIsValid = true;
 
         fields.forEach(({ id, errorId }) => {
-            const valid = validateField(id, errorId);
-            if (!valid) formIsValid = false;
+            if (!validateField(id, errorId)) formIsValid = false;
         });
 
-        if (tinyMCEInitialized) {
-            const contentValid = validateField('postContent', 'contentError');
-            if (!contentValid) formIsValid = false;
+        if (document.getElementById('postCover').files.length > 0) {
+            if (!validateField('postCover', 'coverError')) formIsValid = false;
         }
 
-        const fileValid = validateFile();
-        if (!fileValid) formIsValid = false;
+        if (tinyMCEInitialized && !validateField('postContent', 'contentError')) {
+            formIsValid = false;
+        }
 
-        if (formIsValid) {
-            const submitButton = form.querySelector('button[type="submit"]');
-            submitButton.disabled = true;
-            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Updating...';
+        if (!formIsValid) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: 'Please check all required fields',
+                didOpen: () => {
+                    const firstInvalid = document.querySelector('.is-invalid');
+                    if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+            return;
+        }
 
-            try {
-                if (tinyMCEInitialized) tinymce.triggerSave();
-                const formData = new FormData(form);
+        const submitButton = form.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
 
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    }
-                });
-
-                const result = await response.json();
-
-                if (!response.ok) throw new Error(result.message || 'Update failed');
-
-                Toast.fire({
-                    icon: "success",
-                    title: result.message || 'Post updated successfully!'
-                });
-
-                setTimeout(() => {
-                    if (result.redirect) {
-                        window.location.href = result.redirect;
-                    }
-                }, 1500);
-
-            } catch (error) {
-                console.error('Update error:', error);
-                Swal.fire({
-                    title: 'Update Failed!',
-                    text: error.message,
-                    icon: 'error',
-                    confirmButtonText: 'OK'
-                });
-            } finally {
-                submitButton.disabled = false;
-                submitButton.innerHTML = 'Edit Post';
+        try {
+            if (tinyMCEInitialized) {
+                tinymce.triggerSave();
             }
+            const formData = new FormData(form);
+            formData.append('_method', 'PUT');
+
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || 'Update failed');
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: data.message,
+                willClose: () => {
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    }
+                }
+            });
+
+        } catch (error) {
+            console.error('Update error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: error.message
+            });
+        } finally {
+            submitButton.disabled = false;
+            submitButton.innerHTML = 'Edit Post';
         }
     });
 });
@@ -1321,4 +1456,51 @@ document.addEventListener('DOMContentLoaded', function () {
             submitButton.innerHTML = originalButtonHTML;
         }
     });
+});
+
+/** POST COVER UPLOAD HANDLER */
+function handleCoverPreview(event) {
+    const input = event.target;
+    const preview = document.getElementById('coverPreview');
+    const errorDiv = document.getElementById('coverError');
+    const file = input.files[0];
+
+    preview.classList.remove('has-image', 'has-error');
+    errorDiv.textContent = '';
+
+    if (file) {
+        if (!file.type.startsWith('image/')) {
+            errorDiv.textContent = 'Please select a valid image file';
+            preview.classList.add('has-error');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            preview.style.backgroundImage = `url(${e.target.result})`;
+            preview.classList.add('has-image');
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+const preview = document.getElementById('coverPreview');
+preview.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    preview.classList.add('dragover');
+});
+
+preview.addEventListener('dragleave', (e) => {
+    e.preventDefault();
+    preview.classList.remove('dragover');
+});
+
+preview.addEventListener('drop', (e) => {
+    e.preventDefault();
+    preview.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        document.getElementById('postCover').files = files;
+        handleCoverPreview({ target: document.getElementById('postCover') });
+    }
 });

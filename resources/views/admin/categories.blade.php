@@ -25,7 +25,6 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {{--                        {{ dd($categories) }}--}}
                         @foreach($categories as $category)
                             <tr>
                                 <th scope="row"><?= $category->id ?></th>

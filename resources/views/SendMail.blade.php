@@ -69,7 +69,7 @@
     </div>
     <div class="content">
         <h2>Hello, {{ $details['name'] }} 👋</h2>
-        <p>{{ $details['message'] }}</p>
+        {!! $details['message'] !!}
         <p>Stay updated with the latest in tech by visiting our website.</p>
         <div class="button-container">
             <a href="http://localhost:8000" class="button">Visit TechBlog</a>
