@@ -84,6 +84,15 @@ npm run dev
 php artisan serve
 ```
 
+To access the admin panel, just add `/admin` on your url
+Login as admin: 
+```
+admin@admin.com
+```
+```
+password
+```
+
 ## License
 
 Logo: <a href="https://www.flaticon.com/free-icons/technology" title="technology icons">Technology icons created by
