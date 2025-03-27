@@ -84,7 +84,7 @@ npm run dev
 php artisan serve
 ```
 
-To access the admin panel, just add `/admin` on your url
+To access the admin panel, just add `/admin` on your url\
 Login as admin: 
 ```
 admin@admin.com
